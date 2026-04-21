@@ -34,15 +34,34 @@ def init_app():
         st.session_state.messages = {}
     if "agent_manager" not in st.session_state:
         # 初始化向量库
+        vector_store = None
         try:
             vector_store = VectorStoreManager()
             doc_count = vector_store.get_document_count()
-            if doc_count > 0:
-                st.session_state.knowledge_count = doc_count
-            else:
-                vector_store = None
-                st.session_state.knowledge_count = 0
+
+            # 如果向量库为空，尝试构建
+            if doc_count == 0:
+                from src.retrievers.vector_store import load_knowledge_files, build_vector_store
+                import os
+                from pathlib import Path
+
+                # 检查知识文件是否存在
+                knowledge_dir = Path("./data/knowledge")
+                if knowledge_dir.exists() and list(knowledge_dir.glob("*.txt")):
+                    with st.spinner("首次运行，正在构建知识库..."):
+                        documents = load_knowledge_files(str(knowledge_dir))
+                        if documents:
+                            count = vector_store.add_documents(documents)
+                            doc_count = count
+                            st.success(f"知识库构建完成，共 {count} 个文档")
+                else:
+                    vector_store = None
+                    doc_count = 0
+
+            st.session_state.knowledge_count = doc_count
+
         except Exception as e:
+            st.warning(f"知识库初始化失败: {e}")
             vector_store = None
             st.session_state.knowledge_count = 0
 

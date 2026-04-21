@@ -35,9 +35,11 @@ class Settings(BaseSettings):
     rag_top_k: int = 3
     rag_enabled: bool = True
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore"
+    }
 
 
 @lru_cache()
