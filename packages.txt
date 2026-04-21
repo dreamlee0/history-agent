@@ -1,2 +1,0 @@
-# Streamlit Cloud 系统依赖
-# 无需额外系统包
