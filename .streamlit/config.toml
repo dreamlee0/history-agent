@@ -1,0 +1,11 @@
+[general]
+email = "your-email@example.com"
+
+[browser]
+gatherUsageStats = false
+
+[server]
+headless = true
+port = 8501
+enableCORS = false
+enableXsrfProtection = true
