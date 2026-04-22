@@ -43,7 +43,11 @@ class HistoryCharacterAgent:
         if not HAS_ZHIPU:
             raise ImportError("请安装智谱AI SDK: pip install zhipuai")
 
-        self.client = ZhipuAI(api_key=self.settings.zhipu_api_key)
+        # 添加超时设置，适应云端环境
+        self.client = ZhipuAI(
+            api_key=self.settings.zhipu_api_key,
+            timeout=60.0,  # 60秒超时
+        )
 
     def _retrieve_knowledge(self, query: str, k: int = 3) -> Optional[RAGContext]:
         """检索相关知识"""
@@ -144,13 +148,21 @@ class HistoryCharacterAgent:
         messages.append({"role": "user", "content": user_input})
 
         # 调用智谱AI
-        response = self.client.chat.completions.create(
-            model=self.settings.zhipu_model,
-            messages=messages,
-            temperature=self.settings.temperature,
-        )
-
-        result = response.choices[0].message.content
+        try:
+            response = self.client.chat.completions.create(
+                model=self.settings.zhipu_model,
+                messages=messages,
+                temperature=self.settings.temperature,
+            )
+            result = response.choices[0].message.content
+        except Exception as e:
+            error_msg = str(e)
+            if "Connection" in error_msg or "timeout" in error_msg.lower():
+                raise Exception(f"API连接失败，请检查网络或API Key配置。错误: {error_msg}")
+            elif "api_key" in error_msg.lower() or "unauthorized" in error_msg.lower():
+                raise Exception(f"API Key无效或未配置。请在Streamlit Cloud的Secrets中设置ZHIPU_API_KEY")
+            else:
+                raise Exception(f"API调用失败: {error_msg}")
 
         # 保存记忆
         conversation_memory.add_message(session_id, "user", user_input)
