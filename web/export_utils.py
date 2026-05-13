@@ -33,7 +33,7 @@ def export_to_markdown(
     lines.append("---\n")
 
     for msg in messages:
-        role = "👤 用户" if msg["role"] == "user" else f"🎭 {character_name}"
+        role = "用户" if msg["role"] == "user" else character_name
         content = msg["content"]
         lines.append(f"### {role}\n")
         lines.append(f"{content}\n")
@@ -52,6 +52,32 @@ def export_to_markdown(
     return "\n".join(lines)
 
 
+def _register_chinese_font():
+    """注册中文字体，返回 (font_name, is_bold_supported)"""
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    # 尝试系统字体路径
+    font_paths = [
+        ("/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc", "WenQuanYi"),
+        ("/usr/share/fonts/truetype/wqy/wqy-microhei.ttc", "WenQuanYi"),
+        ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", "NotoSansCJK"),
+        ("/System/Library/Fonts/PingFang.ttc", "PingFang"),
+        ("C:/Windows/Fonts/msyh.ttc", "MSYH"),
+        ("C:/Windows/Fonts/simsun.ttc", "SimSun"),
+    ]
+
+    for font_path, font_name in font_paths:
+        if os.path.exists(font_path):
+            try:
+                pdfmetrics.registerFont(TTFont(font_name, font_path))
+                return font_name
+            except Exception:
+                continue
+
+    return None
+
+
 def export_to_pdf(
     character_name: str,
     messages: List[Dict],
@@ -62,10 +88,10 @@ def export_to_pdf(
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import cm
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
         from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        from reportlab.pdfbase.cidfonts import UnicodeCIDFont
         from reportlab.pdfbase import pdfmetrics
-        from reportlab.pdfbase.ttfonts import TTFont
     except ImportError:
         raise ImportError("请安装reportlab: pip install reportlab")
 
@@ -80,66 +106,46 @@ def export_to_pdf(
         bottomMargin=2*cm
     )
 
+    # 注册中文字体 - 优先使用系统字体，回退到 CID 字体
+    font_name = _register_chinese_font()
+    if not font_name:
+        # 使用 reportlab 内置的 CID 中文字体（无需外部字体文件）
+        pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
+        font_name = 'STSong-Light'
+
     # 样式
     styles = getSampleStyleSheet()
-
-    # 尝试注册中文字体
-    try:
-        # 尝试常见的中文字体路径
-        font_paths = [
-            "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
-            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
-            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-            "/System/Library/Fonts/PingFang.ttc",
-            "C:/Windows/Fonts/msyh.ttc",
-        ]
-        font_registered = False
-        for font_path in font_paths:
-            if os.path.exists(font_path):
-                pdfmetrics.registerFont(TTFont('Chinese', font_path))
-                font_registered = True
-                break
-
-        if font_registered:
-            title_style = ParagraphStyle(
-                'ChineseTitle',
-                parent=styles['Title'],
-                fontName='Chinese',
-                fontSize=24,
-                alignment=TA_CENTER,
-                spaceAfter=30
-            )
-            heading_style = ParagraphStyle(
-                'ChineseHeading',
-                parent=styles['Heading2'],
-                fontName='Chinese',
-                fontSize=14,
-                spaceAfter=12
-            )
-            body_style = ParagraphStyle(
-                'ChineseBody',
-                parent=styles['Normal'],
-                fontName='Chinese',
-                fontSize=11,
-                leading=18,
-                spaceAfter=12
-            )
-            meta_style = ParagraphStyle(
-                'ChineseMeta',
-                parent=styles['Normal'],
-                fontName='Chinese',
-                fontSize=10,
-                textColor='gray',
-                spaceAfter=6
-            )
-        else:
-            raise Exception("No Chinese font found")
-    except:
-        # 回退到默认样式
-        title_style = styles['Title']
-        heading_style = styles['Heading2']
-        body_style = styles['Normal']
-        meta_style = styles['Normal']
+    title_style = ParagraphStyle(
+        'ChineseTitle',
+        parent=styles['Title'],
+        fontName=font_name,
+        fontSize=22,
+        alignment=TA_CENTER,
+        spaceAfter=24
+    )
+    heading_style = ParagraphStyle(
+        'ChineseHeading',
+        parent=styles['Heading2'],
+        fontName=font_name,
+        fontSize=14,
+        spaceAfter=12
+    )
+    body_style = ParagraphStyle(
+        'ChineseBody',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=11,
+        leading=18,
+        spaceAfter=12
+    )
+    meta_style = ParagraphStyle(
+        'ChineseMeta',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=10,
+        textColor='gray',
+        spaceAfter=6
+    )
 
     # 构建内容
     story = []
@@ -171,8 +177,13 @@ def export_to_pdf(
     story.append(Spacer(1, 0.5*cm))
 
     for msg in messages:
-        role = "👤 用户" if msg["role"] == "user" else f"🎭 {character_name}"
+        role = "用户" if msg["role"] == "user" else character_name
+        # 清理内容中的特殊字符
         content = msg["content"].replace("\n", "<br/>")
+        # 转义 XML 特殊字符
+        content = content.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        # 还原我们插入的 <br/>
+        content = content.replace("&lt;br/&gt;", "<br/>")
 
         story.append(Paragraph(f"<b>{role}</b>", body_style))
         story.append(Paragraph(content, body_style))

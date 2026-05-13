@@ -4,6 +4,7 @@ Streamlit Web应用 - 历史人物对话
 """
 import os
 import sys
+import hashlib
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -18,10 +19,8 @@ from web.styles import CUSTOM_CSS
 
 
 def get_session_id():
-    """获取浏览器会话标识"""
+    """获取浏览器会话标识（稳定，不随 rerun 变化）"""
     if "session_id" not in st.session_state:
-        import hashlib
-        # 使用 Streamlit 的内部 session ID
         try:
             ctx = st.runtime.scriptrunner.get_script_run_ctx()
             if ctx:
@@ -58,7 +57,6 @@ def init_app():
     if "current_conversation_id" not in st.session_state:
         st.session_state.current_conversation_id = None
     if "agent_manager" not in st.session_state:
-        # 初始化向量库
         vector_store = None
         try:
             vector_store = VectorStoreManager()
@@ -108,7 +106,6 @@ def render_sidebar():
         # 统计
         total = character_manager.get_count()
         dynasties = character_manager.get_characters_by_dynasty()
-        knowledge_count = st.session_state.get("knowledge_count", 0)
         stats = db.get_stats(session_id)
 
         st.markdown(f"""
@@ -128,12 +125,45 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<div style='margin: 1rem 0;'></div>", unsafe_allow_html=True)
+        # ─── 历史对话（放在人物选择前面，方便查看） ───
+        st.markdown("---")
+        st.markdown("### 历史对话")
+        conversations = db.get_conversations(session_id, limit=10)
+        if conversations:
+            for conv in conversations:
+                char_name = conv["character_name"]
+                char = character_manager.get_character(char_name)
+                avatar = char.avatar if char else "💬"
+                col1, col2 = st.columns([5, 1])
+                with col1:
+                    label = f"{avatar} {conv['title'][:18]}"
+                    if st.button(label, key=f"conv_{conv['id']}", use_container_width=True):
+                        st.session_state.current_character = char_name
+                        st.session_state.current_conversation_id = conv["id"]
+                        messages = db.get_messages(conv["id"])
+                        st.session_state.messages[char_name] = [
+                            {"role": m["role"], "content": m["content"], "sources": m.get("sources", [])}
+                            for m in messages
+                        ]
+                        agent = st.session_state.agent_manager.get_agent(char_name)
+                        if agent:
+                            agent.load_history(conv["id"], char_name)
+                        st.rerun()
+                with col2:
+                    if st.button("X", key=f"del_{conv['id']}", help="删除"):
+                        db.delete_conversation(conv["id"])
+                        if st.session_state.current_conversation_id == conv["id"]:
+                            st.session_state.current_conversation_id = None
+                            st.session_state.messages.get(char_name, []).clear()
+                        st.rerun()
+        else:
+            st.markdown('<div style="color: #999; font-size: 0.85rem; padding: 0.5rem 0;">暂无历史对话</div>', unsafe_allow_html=True)
 
-        # 人物选择
+        # ─── 人物选择 ───
+        st.markdown("---")
         st.markdown("### 选择人物")
         for dynasty, characters in dynasties.items():
-            with st.expander(f"⏳ {dynasty} · {len(characters)}人", expanded=False):
+            with st.expander(f"⏳ {dynasty} · {len(characters)}人"):
                 for char in characters:
                     col1, col2 = st.columns([1, 4])
                     with col1:
@@ -146,42 +176,6 @@ def render_sidebar():
                                 st.session_state.messages[char.name] = []
                             st.rerun()
                         st.markdown(f'<div class="char-title">{char.title}</div>', unsafe_allow_html=True)
-
-        # 历史对话
-        st.markdown("<div style='margin: 1rem 0;'></div>", unsafe_allow_html=True)
-        st.markdown("### 历史对话")
-        conversations = db.get_conversations(session_id, limit=20)
-        if conversations:
-            for conv in conversations:
-                char_name = conv["character_name"]
-                char = character_manager.get_character(char_name)
-                avatar = char.avatar if char else "💬"
-                col1, col2 = st.columns([5, 1])
-                with col1:
-                    label = f"{avatar} {conv['title'][:18]}"
-                    if st.button(label, key=f"conv_{conv['id']}", use_container_width=True):
-                        # 恢复对话
-                        st.session_state.current_character = char_name
-                        st.session_state.current_conversation_id = conv["id"]
-                        messages = db.get_messages(conv["id"])
-                        st.session_state.messages[char_name] = [
-                            {"role": m["role"], "content": m["content"], "sources": m.get("sources", [])}
-                            for m in messages
-                        ]
-                        # 加载到内存记忆
-                        agent = st.session_state.agent_manager.get_agent(char_name)
-                        if agent:
-                            agent.load_history(conv["id"], char_name)
-                        st.rerun()
-                with col2:
-                    if st.button("🗑️", key=f"del_{conv['id']}", help="删除对话"):
-                        db.delete_conversation(conv["id"])
-                        if st.session_state.current_conversation_id == conv["id"]:
-                            st.session_state.current_conversation_id = None
-                            st.session_state.messages.get(char_name, []).clear()
-                        st.rerun()
-        else:
-            st.markdown('<div style="color: #999; font-size: 0.85rem;">暂无历史对话</div>', unsafe_allow_html=True)
 
 
 def render_welcome():
@@ -198,14 +192,14 @@ def render_welcome():
         st.markdown(f"""
         <div style="text-align: center; margin: 1rem 0; padding: 0.5rem;
                     background: rgba(184, 134, 11, 0.1); border-radius: 8px;">
-            <span style="color: var(--gold);">📚 知识库已加载 {knowledge_count} 篇史料文档</span>
+            <span style="color: var(--gold);">知识库已加载 {knowledge_count} 篇史料文档</span>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div style="text-align: center; margin: 1rem 0; padding: 0.5rem;
                     background: rgba(199, 62, 58, 0.1); border-radius: 8px;">
-            <span style="color: var(--vermillion);">⚠️ 知识库未加载，请运行 scripts/build_vector_db.py</span>
+            <span style="color: var(--vermillion);">知识库未加载，请运行 scripts/build_vector_db.py</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -309,41 +303,6 @@ def render_character_profile():
     """, unsafe_allow_html=True)
 
 
-def render_source_panel(sources: list):
-    """渲染史料来源面板"""
-    if not sources:
-        return
-
-    st.markdown("""
-    <div class="source-panel">
-        <div class="source-title">📚 参考史料</div>
-    """, unsafe_allow_html=True)
-
-    for src in sources:
-        url = src.get("url", "")
-        title = src.get("title", "未知")
-        source = src.get("source", "未知")
-
-        if url:
-            st.markdown(f"""
-            <div class="source-item">
-                <span class="source-index">[{src.get('index', '')}]</span>
-                <a href="{url}" target="_blank" class="source-link">{title}</a>
-                <span class="source-from">- {source}</span>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="source-item">
-                <span class="source-index">[{src.get('index', '')}]</span>
-                <span class="source-title-text">{title}</span>
-                <span class="source-from">- {source}</span>
-            </div>
-            """, unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-
 def render_chat():
     """渲染对话区域"""
     char_name = st.session_state.current_character
@@ -365,7 +324,7 @@ def render_chat():
                 ])
                 st.markdown(
                     f'<div style="font-size: 0.75rem; color: #888; margin-top: 0.5rem;">'
-                    f'📖 参考资料: {sources_text}</div>',
+                    f'参考资料: {sources_text}</div>',
                     unsafe_allow_html=True
                 )
 
@@ -387,10 +346,7 @@ def render_chat():
                             session_id=char_name,
                             conversation_id=st.session_state.current_conversation_id,
                         )
-
-                        # 更新当前对话 ID
                         st.session_state.current_conversation_id = conv_id
-
                         st.write(response)
 
                         if sources:
@@ -399,7 +355,7 @@ def render_chat():
                             ])
                             st.markdown(
                                 f'<div style="font-size: 0.75rem; color: #888; margin-top: 0.5rem;">'
-                                f'📖 参考资料: {sources_text}</div>',
+                                f'参考资料: {sources_text}</div>',
                                 unsafe_allow_html=True
                             )
 
@@ -418,7 +374,7 @@ def render_chat():
         st.markdown("---")
         col1, col2, col3, col4 = st.columns([1, 1, 1, 3])
         with col1:
-            if st.button("🗑️ 清空对话", use_container_width=True):
+            if st.button("清空对话", use_container_width=True):
                 st.session_state.messages[char_name] = []
                 st.session_state.current_conversation_id = None
                 agent = st.session_state.agent_manager.get_agent(char_name)
@@ -426,7 +382,7 @@ def render_chat():
                     agent.clear_memory(session_id=char_name)
                 st.rerun()
         with col2:
-            if st.button("🔄 更换人物", use_container_width=True):
+            if st.button("更换人物", use_container_width=True):
                 st.session_state.current_character = None
                 st.session_state.current_conversation_id = None
                 st.rerun()
@@ -448,7 +404,7 @@ def render_chat():
                 }
                 md_content = export_to_markdown(char_name, messages, character_info)
                 st.download_button(
-                    label="📄 下载MD",
+                    label="下载MD",
                     data=md_content,
                     file_name=get_download_filename(char_name, "md"),
                     mime="text/markdown",
@@ -463,14 +419,14 @@ def render_chat():
                     }
                     pdf_bytes = export_to_pdf(char_name, messages, character_info)
                     st.download_button(
-                        label="📕 下载PDF",
+                        label="下载PDF",
                         data=pdf_bytes,
                         file_name=get_download_filename(char_name, "pdf"),
                         mime="application/pdf",
                         use_container_width=True
                     )
                 except Exception as e:
-                    st.warning(f"PDF导出需要安装reportlab: pip install reportlab")
+                    st.warning(f"PDF导出失败: {e}")
 
 
 def main():
