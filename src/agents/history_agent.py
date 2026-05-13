@@ -1,9 +1,10 @@
 """
-历史人物对话Agent - 集成RAG知识检索
+历史人物对话Agent - 集成RAG知识检索 + SQLite持久化
 支持知识溯源，回复时引用史料来源
 """
 from typing import List, Optional, Tuple
 from dataclasses import dataclass
+import time
 
 from langchain_core.documents import Document
 
@@ -29,24 +30,25 @@ class RAGContext:
 
 
 class HistoryCharacterAgent:
-    """历史人物对话Agent - 支持RAG知识增强"""
+    """历史人物对话Agent - 支持RAG知识增强 + 持久化"""
 
     def __init__(
         self,
         character: HistoricalCharacter,
         vector_store=None,
+        db_manager=None,
     ):
         self.settings = get_settings()
         self.character = character
         self.vector_store = vector_store
+        self.db = db_manager
 
         if not HAS_ZHIPU:
             raise ImportError("请安装智谱AI SDK: pip install zhipuai")
 
-        # 添加超时设置，适应云端环境
         self.client = ZhipuAI(
             api_key=self.settings.zhipu_api_key,
-            timeout=60.0,  # 60秒超时
+            timeout=60.0,
         )
 
     def _retrieve_knowledge(self, query: str, k: int = 3) -> Optional[RAGContext]:
@@ -55,19 +57,16 @@ class HistoryCharacterAgent:
             return None
 
         try:
-            # 先搜索与当前人物相关的知识
             docs = self.vector_store.search_by_character(
                 query, self.character.name, k=k
             )
 
-            # 如果没找到，进行通用搜索
             if not docs:
                 docs = self.vector_store.similarity_search(query, k=k)
 
             if not docs:
                 return None
 
-            # 构建上下文文本
             context_parts = []
             sources = []
             for i, doc in enumerate(docs, 1):
@@ -116,72 +115,106 @@ class HistoryCharacterAgent:
 """
         return base_prompt
 
+    def _call_api_with_retry(self, messages: list, max_retries: int = 3) -> str:
+        """带重试机制的 API 调用"""
+        for attempt in range(max_retries):
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.settings.zhipu_model,
+                    messages=messages,
+                    temperature=self.settings.temperature,
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                error_msg = str(e)
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt  # 指数退避
+                    time.sleep(wait_time)
+                    continue
+                # 最后一次重试失败
+                if "Connection" in error_msg or "timeout" in error_msg.lower():
+                    raise Exception(f"API连接失败，请检查网络或API Key配置。错误: {error_msg}")
+                elif "api_key" in error_msg.lower() or "unauthorized" in error_msg.lower():
+                    raise Exception(f"API Key无效或未配置。请在Streamlit Cloud的Secrets中设置ZHIPU_API_KEY")
+                else:
+                    raise Exception(f"API调用失败: {error_msg}")
+
     def chat(
         self,
         user_input: str,
         session_id: str = "default",
-    ) -> Tuple[str, List[dict]]:
+        conversation_id: Optional[int] = None,
+    ) -> Tuple[str, List[dict], int]:
         """
         对话
-        返回: (回复内容, 引用来源列表)
+        返回: (回复内容, 引用来源列表, conversation_id)
         """
-        # 获取历史消息
+        # 如果没有 conversation_id，创建新对话
+        if conversation_id is None and self.db:
+            conversation_id = self.db.create_conversation(
+                session_id=session_id,
+                character_name=self.character.name,
+                title=user_input[:30] + ("..." if len(user_input) > 30 else ""),
+            )
+
+        # 获取历史消息（从内存或数据库）
         history = conversation_memory.get_messages(session_id)
+        if not history and conversation_id and self.db:
+            # 从数据库恢复历史
+            db_messages = self.db.get_messages(conversation_id)
+            conversation_memory.load_from_db(session_id, db_messages)
+            history = conversation_memory.get_messages(session_id)
+
+        # 保存用户消息
+        if self.db and conversation_id:
+            self.db.add_message(conversation_id, "user", user_input)
 
         # RAG检索
         rag_context = self._retrieve_knowledge(user_input)
 
         # 构建消息列表
         messages = []
-
-        # 系统提示
         system_prompt = self._build_system_prompt(rag_context)
         messages.append({"role": "system", "content": system_prompt})
 
-        # 历史对话
         for msg in history:
             if hasattr(msg, 'content'):
                 role = "user" if msg.__class__.__name__ == "HumanMessage" else "assistant"
                 messages.append({"role": role, "content": msg.content})
 
-        # 当前输入
         messages.append({"role": "user", "content": user_input})
 
-        # 调用智谱AI
-        try:
-            response = self.client.chat.completions.create(
-                model=self.settings.zhipu_model,
-                messages=messages,
-                temperature=self.settings.temperature,
-            )
-            result = response.choices[0].message.content
-        except Exception as e:
-            error_msg = str(e)
-            if "Connection" in error_msg or "timeout" in error_msg.lower():
-                raise Exception(f"API连接失败，请检查网络或API Key配置。错误: {error_msg}")
-            elif "api_key" in error_msg.lower() or "unauthorized" in error_msg.lower():
-                raise Exception(f"API Key无效或未配置。请在Streamlit Cloud的Secrets中设置ZHIPU_API_KEY")
-            else:
-                raise Exception(f"API调用失败: {error_msg}")
+        # 调用 API（带重试）
+        result = self._call_api_with_retry(messages)
 
-        # 保存记忆
+        # 保存助手消息
+        sources = rag_context.sources if rag_context else []
+        if self.db and conversation_id:
+            self.db.add_message(conversation_id, "assistant", result, sources)
+
+        # 更新内存记忆
         conversation_memory.add_message(session_id, "user", user_input)
         conversation_memory.add_message(session_id, "assistant", result)
 
-        # 返回回复和来源
-        sources = rag_context.sources if rag_context else []
-        return result, sources
+        return result, sources, conversation_id
 
     def clear_memory(self, session_id: str = "default"):
         """清空对话记忆"""
         conversation_memory.clear(session_id)
 
+    def load_history(self, conversation_id: int, session_id: str):
+        """从数据库加载历史对话到内存"""
+        if self.db:
+            db_messages = self.db.get_messages(conversation_id)
+            conversation_memory.load_from_db(session_id, db_messages)
+
 
 class AgentManager:
     """Agent管理器"""
 
-    def __init__(self, vector_store=None):
+    def __init__(self, vector_store=None, db_manager=None):
         self.vector_store = vector_store
+        self.db = db_manager
         self._agents: dict[str, HistoryCharacterAgent] = {}
 
     def get_agent(self, character_name: str) -> Optional[HistoryCharacterAgent]:
@@ -193,7 +226,7 @@ class AgentManager:
         if not character:
             return None
 
-        agent = HistoryCharacterAgent(character, self.vector_store)
+        agent = HistoryCharacterAgent(character, self.vector_store, self.db)
         self._agents[character_name] = agent
         return agent
 
@@ -204,5 +237,4 @@ class AgentManager:
     def set_vector_store(self, vector_store):
         """设置向量存储"""
         self.vector_store = vector_store
-        # 清除现有agent，使其重新创建时使用新的向量存储
         self._agents.clear()

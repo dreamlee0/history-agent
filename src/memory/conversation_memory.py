@@ -1,5 +1,5 @@
 """
-对话记忆管理
+对话记忆管理 - 支持内存缓存 + SQLite 持久化
 """
 from typing import List, Dict, Optional
 from collections import deque
@@ -8,7 +8,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 
 
 class ConversationMemory:
-    """对话记忆管理器"""
+    """对话记忆管理器（内存缓存，用于 LLM 上下文）"""
 
     def __init__(self, max_history: int = 10):
         self.max_history = max_history
@@ -20,12 +20,7 @@ class ConversationMemory:
             self._memories[session_id] = deque(maxlen=self.max_history)
         return self._memories[session_id]
 
-    def add_message(
-        self,
-        session_id: str,
-        role: str,
-        content: str
-    ):
+    def add_message(self, session_id: str, role: str, content: str):
         """添加消息"""
         memory = self._get_session_memory(session_id)
         if role == "user":
@@ -46,6 +41,17 @@ class ConversationMemory:
             role = "用户" if isinstance(msg, HumanMessage) else "我"
             history.append(f"{role}: {msg.content}")
         return "\n".join(history)
+
+    def load_from_db(self, session_id: str, messages: List[Dict]):
+        """从数据库加载历史消息到内存"""
+        memory = self._get_session_memory(session_id)
+        memory.clear()
+        # 只加载最近的 max_history 条
+        for msg in messages[-self.max_history:]:
+            if msg["role"] == "user":
+                memory.append(HumanMessage(content=msg["content"]))
+            else:
+                memory.append(AIMessage(content=msg["content"]))
 
     def clear(self, session_id: str):
         """清空会话记忆"""

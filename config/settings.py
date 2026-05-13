@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     rag_top_k: int = 3
     rag_enabled: bool = True
 
+    # 数据库配置
+    db_path: str = Field(default="./data/history_chat.db", env="DB_PATH")
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",

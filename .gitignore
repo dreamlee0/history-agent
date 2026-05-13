@@ -11,5 +11,7 @@ venv/
 dist/
 build/
 data/vector_db/
+data/history_chat.db
+*.db
 *.log
 .claude/
