@@ -105,7 +105,6 @@ CUSTOM_CSS = """
         border: 1px solid rgba(184, 134, 11, 0.15) !important;
         border-radius: 8px !important;
         margin-bottom: 0.5rem !important;
-        overflow: hidden;
         transition: all 0.3s ease;
     }
 
