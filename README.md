@@ -63,7 +63,8 @@ cp .env.example .env
 streamlit run web/app.py
 ```
 
-访问：http://localhost:8501
+本地访问：http://localhost:8501
+在线访问：history-agent.streamlit.app/
 
 ## 🛠️ 技术栈
 
