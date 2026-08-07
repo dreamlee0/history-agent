@@ -9,6 +9,16 @@ import hashlib
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import streamlit as st
+
+# 将 Streamlit Secrets 桥接到环境变量，供 pydantic-settings 读取
+# (.env 不会部署到云端，密钥需配在 Streamlit Cloud 的 Secrets 中)
+try:
+    for _k in ("LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL", "EMBEDDING_MODEL", "HF_ENDPOINT"):
+        if _k in st.secrets:
+            os.environ.setdefault(_k, str(st.secrets[_k]))
+except Exception:
+    pass
+
 from src.characters import character_manager
 from src.agents import AgentManager
 from src.retrievers.vector_store import VectorStoreManager
