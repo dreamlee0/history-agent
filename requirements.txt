@@ -1,20 +1,21 @@
-# Core
-langchain>=0.2.0
-langchain-openai>=0.1.0
-langchain-community>=0.2.0
-langchain-core>=0.2.0
-langchain-text-splitters>=0.3.0
-langchain-chroma>=0.1.0
+# Core (版本与构建向量库的本地环境严格一致，避免 chromadb 0.x/1.x 格式不兼容)
+langchain==1.2.15
+langchain-core==1.5.3
+langchain-community==0.4.1
+langchain-text-splitters==1.1.1
+langchain-chroma==1.1.0
+langchain-openai==1.1.12
 
 # OpenAI兼容 SDK (LLM用，可接智谱/DeepSeek/OpenAI等)
-openai>=1.0.0
+openai==2.38.0
 
 # 本地 Embedding (HuggingFace, 免费无需 API Key)
-langchain-huggingface>=0.1.0
-sentence-transformers>=2.0.0
+langchain-huggingface==1.2.2
+sentence-transformers==5.4.1
+transformers==4.51.1
 
-# RAG & Embeddings
-chromadb>=0.4.0,<1.0.0
+# 向量数据库 (必须 1.x，与已提交的向量库格式匹配，切勿降到 0.x)
+chromadb==1.5.8
 
 # Document Loaders
 pypdf>=3.0.0
@@ -32,5 +33,5 @@ reportlab>=4.0.0
 # Utils
 python-dotenv>=1.0.0
 pydantic>=2.0.0
-pydantic-settings>=2.0.0
+pydantic-settings>=2.10.1
 pyyaml>=6.0
