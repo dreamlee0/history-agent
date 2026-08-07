@@ -6,8 +6,12 @@ langchain-core>=0.2.0
 langchain-text-splitters>=0.3.0
 langchain-chroma>=0.1.0
 
-# 智谱AI
-zhipuai>=2.0.0
+# OpenAI兼容 SDK (LLM用，可接智谱/DeepSeek/OpenAI等)
+openai>=1.0.0
+
+# 本地 Embedding (HuggingFace, 免费无需 API Key)
+langchain-huggingface>=0.1.0
+sentence-transformers>=2.0.0
 
 # RAG & Embeddings
 chromadb>=0.4.0,<1.0.0

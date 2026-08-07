@@ -10,7 +10,6 @@ venv/
 *.egg-info/
 dist/
 build/
-data/vector_db/
 data/history_chat.db
 *.db
 *.log

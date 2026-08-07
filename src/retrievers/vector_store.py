@@ -1,7 +1,7 @@
 """
 向量数据库管理器 - RAG知识库核心
 支持历史人物资料的存储、检索和溯源
-使用智谱AI Embedding
+使用本地 HuggingFace Embedding (免费，无需 API Key)
 """
 import os
 import sys
@@ -15,37 +15,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from config import get_settings
 
-
-class ZhipuEmbeddings:
-    """智谱AI Embedding封装"""
-
-    def __init__(self, api_key: str, model: str = "embedding-3"):
-        self.api_key = api_key
-        self.model = model
-        try:
-            from zhipuai import ZhipuAI
-            self.client = ZhipuAI(api_key=api_key)
-        except ImportError:
-            raise ImportError("请安装智谱AI SDK: pip install zhipuai")
-
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        """批量嵌入文档"""
-        embeddings = []
-        for text in texts:
-            result = self.client.embeddings.create(
-                model=self.model,
-                input=text
-            )
-            embeddings.append(result.data[0].embedding)
-        return embeddings
-
-    def embed_query(self, text: str) -> List[float]:
-        """嵌入查询"""
-        result = self.client.embeddings.create(
-            model=self.model,
-            input=text
-        )
-        return result.data[0].embedding
+# HuggingFace 模型下载超时设置（云端首次加载更宽容，避免慢连接直接失败）
+os.environ.setdefault("HF_HUB_DOWNLOAD_TIMEOUT", "60")
 
 
 class VectorStoreManager:
@@ -60,11 +31,13 @@ class VectorStoreManager:
 
     @property
     def embeddings(self):
-        """延迟加载embeddings"""
+        """延迟加载本地 Embedding 模型 (HuggingFace, 免费)"""
         if self._embeddings is None:
-            self._embeddings = ZhipuEmbeddings(
-                api_key=self.settings.zhipu_api_key,
-                model=self.settings.embedding_model
+            from langchain_huggingface import HuggingFaceEmbeddings
+            self._embeddings = HuggingFaceEmbeddings(
+                model_name=self.settings.embedding_model,
+                model_kwargs={"device": "cpu"},
+                encode_kwargs={"normalize_embeddings": True},
             )
         return self._embeddings
 
@@ -204,9 +177,9 @@ def load_knowledge_files(knowledge_dir: str = "./data/knowledge") -> List[Docume
                 elif line.startswith("【URL】"):
                     url = line[5:].strip()
                 elif line.startswith("【人物】"):
-                    character = line[5:].strip()
+                    character = line[4:].strip()
                 elif line.startswith("【分类】"):
-                    category = line[5:].strip()
+                    category = line[4:].strip()
 
             content_start = False
             real_content = []

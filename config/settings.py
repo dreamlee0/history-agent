@@ -10,12 +10,18 @@ from functools import lru_cache
 class Settings(BaseSettings):
     """应用配置"""
 
-    # 智谱AI
-    zhipu_api_key: str = Field(default="", env="ZHIPU_API_KEY")
-    zhipu_model: str = Field(default="glm-4-flash", env="ZHIPU_MODEL")
+    # LLM (OpenAI兼容接口，可接智谱/DeepSeek/OpenAI等)
+    llm_api_key: str = Field(default="", env="LLM_API_KEY")
+    llm_base_url: str = Field(
+        default="https://open.bigmodel.cn/api/paas/v4",
+        env="LLM_BASE_URL",
+    )
+    llm_model: str = Field(default="glm-4-flash", env="LLM_MODEL")
 
-    # Embedding配置 (使用智谱AI的embedding)
-    embedding_model: str = Field(default="embedding-3", env="EMBEDDING_MODEL")
+    # Embedding配置 (本地 HuggingFace 模型，免费无需 API Key)
+    embedding_model: str = Field(
+        default="BAAI/bge-small-zh-v1.5", env="EMBEDDING_MODEL"
+    )
 
     # 向量数据库
     vector_db_path: str = Field(

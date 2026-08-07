@@ -12,12 +12,12 @@ from config import get_settings
 from src.characters import HistoricalCharacter, character_manager
 from src.memory import conversation_memory
 
-# 智谱AI SDK
+# OpenAI兼容 SDK (可接智谱/DeepSeek/OpenAI等)
 try:
-    from zhipuai import ZhipuAI
-    HAS_ZHIPU = True
+    from openai import OpenAI
+    HAS_OPENAI = True
 except ImportError:
-    HAS_ZHIPU = False
+    HAS_OPENAI = False
 
 
 @dataclass
@@ -43,11 +43,15 @@ class HistoryCharacterAgent:
         self.vector_store = vector_store
         self.db = db_manager
 
-        if not HAS_ZHIPU:
-            raise ImportError("请安装智谱AI SDK: pip install zhipuai")
+        if not HAS_OPENAI:
+            raise ImportError("请安装 openai SDK: pip install openai")
 
-        self.client = ZhipuAI(
-            api_key=self.settings.zhipu_api_key,
+        if not self.settings.llm_api_key:
+            raise ValueError("LLM_API_KEY 未配置，请在环境变量或 Streamlit Secrets 中设置")
+
+        self.client = OpenAI(
+            api_key=self.settings.llm_api_key,
+            base_url=self.settings.llm_base_url,
             timeout=60.0,
         )
 
@@ -120,7 +124,7 @@ class HistoryCharacterAgent:
         for attempt in range(max_retries):
             try:
                 response = self.client.chat.completions.create(
-                    model=self.settings.zhipu_model,
+                    model=self.settings.llm_model,
                     messages=messages,
                     temperature=self.settings.temperature,
                 )
@@ -135,7 +139,7 @@ class HistoryCharacterAgent:
                 if "Connection" in error_msg or "timeout" in error_msg.lower():
                     raise Exception(f"API连接失败，请检查网络或API Key配置。错误: {error_msg}")
                 elif "api_key" in error_msg.lower() or "unauthorized" in error_msg.lower():
-                    raise Exception(f"API Key无效或未配置。请在Streamlit Cloud的Secrets中设置ZHIPU_API_KEY")
+                    raise Exception(f"API Key无效或未配置。请在Streamlit Cloud的Secrets中设置LLM_API_KEY")
                 else:
                     raise Exception(f"API调用失败: {error_msg}")
 
