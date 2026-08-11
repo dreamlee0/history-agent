@@ -19,6 +19,38 @@ from config import get_settings
 os.environ.setdefault("HF_HUB_DOWNLOAD_TIMEOUT", "60")
 
 
+def _resolve_embedding_model() -> str:
+    """解析本地缓存的 Embedding 模型路径。
+
+    sentence-transformers 加载模型时会对 huggingface.co 发起版本校验请求。
+    新版 huggingface_hub(0.36+) 的 hf_hub_download 默认 local_files_only=False，
+    会强制做远端 HEAD 校验，受限网络下反复重试可挂起数十秒甚至超时（实测 >200s）。
+
+    这里把模型解析成本地缓存快照路径传入，加载时完全走本地（约 5s），
+    顺带启用离线环境变量以防其它 HF 调用联网。若本地无缓存（如云端首次部署），
+    保持仓库 id 不变，让其正常下载。
+    """
+    model_name = get_settings().embedding_model
+
+    # 本身就是本地路径
+    if Path(model_name).exists():
+        return model_name
+
+    # 查找 HF hub 缓存中的模型快照
+    cache_home = Path(os.environ.get("HF_HOME", Path.home() / ".cache/huggingface"))
+    cache_root = Path(os.environ.get("HF_HUB_CACHE", cache_home / "hub"))
+    model_cache = cache_root / f"models--{model_name.replace('/', '--')}"
+    snapshots = model_cache / "snapshots"
+    if snapshots.exists():
+        snap_dirs = [p for p in snapshots.iterdir() if p.is_dir()]
+        if snap_dirs:
+            os.environ["HF_HUB_OFFLINE"] = "1"
+            os.environ["TRANSFORMERS_OFFLINE"] = "1"
+            return str(snap_dirs[0])
+
+    return model_name
+
+
 class VectorStoreManager:
     """向量数据库管理器"""
 
@@ -34,8 +66,9 @@ class VectorStoreManager:
         """延迟加载本地 Embedding 模型 (HuggingFace, 免费)"""
         if self._embeddings is None:
             from langchain_huggingface import HuggingFaceEmbeddings
+            # 优先用本地缓存快照路径，避免加载时联网校验挂起
             self._embeddings = HuggingFaceEmbeddings(
-                model_name=self.settings.embedding_model,
+                model_name=_resolve_embedding_model(),
                 model_kwargs={"device": "cpu"},
                 encode_kwargs={"normalize_embeddings": True},
             )
@@ -98,9 +131,25 @@ class VectorStoreManager:
         self,
         query: str,
         k: int = 4,
+        filter: Optional[Dict] = None,
     ) -> List[tuple]:
-        """带分数的相似度搜索"""
-        return self.vectorstore.similarity_search_with_score(query, k=k)
+        """带分数的相似度搜索（分数为距离，越小越相关）"""
+        return self.vectorstore.similarity_search_with_score(
+            query, k=k, filter=filter
+        )
+
+    def search_by_character_with_score(
+        self,
+        query: str,
+        character: str,
+        k: int = 3,
+    ) -> List[tuple]:
+        """按人物过滤检索（带距离分数，越小越相关）"""
+        return self.vectorstore.similarity_search_with_score(
+            query,
+            k=k,
+            filter={"character": character},
+        )
 
     def search_by_character(
         self,

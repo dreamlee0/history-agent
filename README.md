@@ -32,7 +32,7 @@
 
 ## ✨ 功能特点
 
-- 🎭 **角色扮演** - 96位历史人物，覆盖20个朝代，真实还原人物性格和说话风格
+- 🎭 **角色扮演** - 97位历史人物，覆盖20个朝代，真实还原人物性格和说话风格
 - 📚 **RAG知识增强** - 基于真实史料回答问题，支持知识溯源
 - 💬 **多轮对话** - 支持上下文记忆，连贯对话
 - 💾 **对话持久化** - SQLite 存储对话历史，刷新不丢失
@@ -84,7 +84,7 @@ history-agent/
 ├── config/                  # 配置管理
 │   └── settings.py
 ├── data/
-│   ├── characters/          # 96位历史人物配置（YAML）
+│   ├── characters/          # 97位历史人物配置（YAML）
 │   │   ├── shanggu/         # 上古
 │   │   ├── shang/           # 商朝
 │   │   ├── xizhou/          # 西周
@@ -122,7 +122,7 @@ history-agent/
 └── requirements.txt
 ```
 
-## 📚 历史人物列表（96位）
+## 📚 历史人物列表（97位）
 
 | 朝代 | 人物 |
 |------|------|
@@ -166,9 +166,10 @@ history-agent/
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| ZHIPU_API_KEY | 智谱AI API Key | - |
-| ZHIPU_MODEL | 大模型名称 | glm-4.5-air |
-| EMBEDDING_MODEL | Embedding模型 | embedding-3 |
+| LLM_API_KEY | 智谱AI API Key（或任意 OpenAI 兼容接口 Key） | - |
+| LLM_BASE_URL | LLM 接口地址 | https://open.bigmodel.cn/api/paas/v4 |
+| LLM_MODEL | 大模型名称 | glm-4.5-flash |
+| EMBEDDING_MODEL | Embedding模型（本地 HuggingFace） | BAAI/bge-small-zh-v1.5 |
 | VECTOR_DB_PATH | 向量数据库路径 | ./data/vector_db |
 | DB_PATH | 对话数据库路径 | ./data/history_chat.db |
 

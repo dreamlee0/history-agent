@@ -29,6 +29,12 @@ class RAGContext:
     sources: List[dict]
 
 
+# 过滤结果相关性阈值：当按人物过滤的最优结果距离
+# 明显劣于全局最优结果（大于该倍数）时，判定用户问题与本人物无关，
+# 退回全局检索，避免把当事人自己的传记误当"相关史料"注入。
+FILTERED_SCORE_RATIO = 1.25
+
+
 class HistoryCharacterAgent:
     """历史人物对话Agent - 支持RAG知识增强 + 持久化"""
 
@@ -56,17 +62,36 @@ class HistoryCharacterAgent:
         )
 
     def _retrieve_knowledge(self, query: str, k: int = 3) -> Optional[RAGContext]:
-        """检索相关知识"""
+        """检索相关知识。
+
+        按人物过滤优先，但会用相关性分数做兜底判断：
+        - 过滤结果明显劣于全局最优（如用户问的是别人）→ 退回全局检索；
+        - 过滤结果为空 → 退回全局检索。
+        避免把当事人自己的传记误当"相关史料"注入，导致引用错误。
+        """
         if not self.vector_store:
             return None
 
         try:
-            docs = self.vector_store.search_by_character(
+            # 1) 按人物过滤检索（带分数，距离越小越相关）
+            filtered = self.vector_store.search_by_character_with_score(
                 query, self.character.name, k=k
             )
+            # 2) 全局检索（带分数），用于相关性对比与兜底
+            global_results = self.vector_store.similarity_search_with_score(
+                query, k=k
+            )
 
-            if not docs:
-                docs = self.vector_store.similarity_search(query, k=k)
+            docs = None
+            if filtered:
+                best_filtered = filtered[0][1]
+                best_global = global_results[0][1] if global_results else None
+                # 过滤结果不比全局最优差太多时，保留人物聚焦的结果
+                if best_global is None or best_filtered <= best_global * FILTERED_SCORE_RATIO:
+                    docs = [d for d, _ in filtered]
+
+            if docs is None and global_results:
+                docs = [d for d, _ in global_results]
 
             if not docs:
                 return None
@@ -107,15 +132,26 @@ class HistoryCharacterAgent:
             base_prompt += f"""
 
 ## 相关历史史料
-以下是从史料中检索到的相关信息，请参考这些内容回答，并在回答末尾标注引用来源：
+以下是从史料库中检索到的相关信息：
 
 {rag_context.context_text}
+
+## 史料使用规则（必须严格遵守）
+1. 【以史料为准】优先依据上面史料回答；史料已明确记载的内容，直接采用，不得随意增删或虚构细节。
+2. 【禁止编造】史料未记载的内容，请明确说明"此事史料记载有限，未有详载"，不得为了角色扮演而编造史实、年份、数字或文献。
+3. 【引用受限于史料】末尾的【参考史料】只能从上面列出的史料中选取，严禁引用史料列表中不存在的文献名称。
+4. 【角色与事实平衡】可保持人物口吻与性格，但历史事实必须准确；若问及与本人物无关或超出本人时代之事，依据史料客观回答。
 
 ## 引用格式要求
 回答时请在末尾添加引用标注，格式如：
 【参考史料】[1]《标题》- 来源
+"""
+        else:
+            base_prompt += """
 
-如果史料内容与问题相关，请优先使用史料中的信息。如果史料与问题无关，可以忽略。
+## 回答约束
+本次检索未获取到相关史料。请基于可靠的历史常识回答，保持人物口吻；
+若不确定，请如实说明"此事史料记载有限"，切勿编造文献出处或具体数字。
 """
         return base_prompt
 
@@ -152,7 +188,13 @@ class HistoryCharacterAgent:
         """
         对话
         返回: (回复内容, 引用来源列表, conversation_id)
+
+        session_id 用于数据库对话归属（如浏览器会话）；内存记忆按
+        "会话:人物" 复合键隔离，避免多用户、多人物之间的上下文串扰。
         """
+        # 内存记忆键：会话 + 人物，双重隔离
+        mem_key = f"{session_id}:{self.character.name}"
+
         # 如果没有 conversation_id，创建新对话
         if conversation_id is None and self.db:
             conversation_id = self.db.create_conversation(
@@ -162,12 +204,12 @@ class HistoryCharacterAgent:
             )
 
         # 获取历史消息（从内存或数据库）
-        history = conversation_memory.get_messages(session_id)
+        history = conversation_memory.get_messages(mem_key)
         if not history and conversation_id and self.db:
             # 从数据库恢复历史
             db_messages = self.db.get_messages(conversation_id)
-            conversation_memory.load_from_db(session_id, db_messages)
-            history = conversation_memory.get_messages(session_id)
+            conversation_memory.load_from_db(mem_key, db_messages)
+            history = conversation_memory.get_messages(mem_key)
 
         # 保存用户消息
         if self.db and conversation_id:
@@ -197,20 +239,22 @@ class HistoryCharacterAgent:
             self.db.add_message(conversation_id, "assistant", result, sources)
 
         # 更新内存记忆
-        conversation_memory.add_message(session_id, "user", user_input)
-        conversation_memory.add_message(session_id, "assistant", result)
+        conversation_memory.add_message(mem_key, "user", user_input)
+        conversation_memory.add_message(mem_key, "assistant", result)
 
         return result, sources, conversation_id
 
     def clear_memory(self, session_id: str = "default"):
         """清空对话记忆"""
-        conversation_memory.clear(session_id)
+        conversation_memory.clear(f"{session_id}:{self.character.name}")
 
     def load_history(self, conversation_id: int, session_id: str):
         """从数据库加载历史对话到内存"""
         if self.db:
             db_messages = self.db.get_messages(conversation_id)
-            conversation_memory.load_from_db(session_id, db_messages)
+            conversation_memory.load_from_db(
+                f"{session_id}:{self.character.name}", db_messages
+            )
 
 
 class AgentManager:

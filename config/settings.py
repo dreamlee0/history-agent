@@ -16,7 +16,7 @@ class Settings(BaseSettings):
         default="https://open.bigmodel.cn/api/paas/v4",
         env="LLM_BASE_URL",
     )
-    llm_model: str = Field(default="glm-4-flash", env="LLM_MODEL")
+    llm_model: str = Field(default="glm-4.5-flash", env="LLM_MODEL")
 
     # Embedding配置 (本地 HuggingFace 模型，免费无需 API Key)
     embedding_model: str = Field(

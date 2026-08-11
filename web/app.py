@@ -157,7 +157,7 @@ def render_sidebar():
                         ]
                         agent = st.session_state.agent_manager.get_agent(char_name)
                         if agent:
-                            agent.load_history(conv["id"], char_name)
+                            agent.load_history(conv["id"], get_session_id())
                         st.rerun()
                 with col2:
                     if st.button("X", key=f"del_{conv['id']}", help="删除"):
@@ -243,6 +243,9 @@ def render_welcome():
                             {"role": m["role"], "content": m["content"], "sources": m.get("sources", [])}
                             for m in messages
                         ]
+                        agent = st.session_state.agent_manager.get_agent(char.name)
+                        if agent:
+                            agent.load_history(conv["id"], get_session_id())
                         st.rerun()
 
     st.markdown("""
@@ -353,7 +356,7 @@ def render_chat():
                     try:
                         response, sources, conv_id = agent.chat(
                             prompt,
-                            session_id=char_name,
+                            session_id=get_session_id(),
                             conversation_id=st.session_state.current_conversation_id,
                         )
                         st.session_state.current_conversation_id = conv_id
@@ -389,7 +392,7 @@ def render_chat():
                 st.session_state.current_conversation_id = None
                 agent = st.session_state.agent_manager.get_agent(char_name)
                 if agent:
-                    agent.clear_memory(session_id=char_name)
+                    agent.clear_memory(session_id=get_session_id())
                 st.rerun()
         with col2:
             if st.button("更换人物", use_container_width=True):
