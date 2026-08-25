@@ -14,9 +14,12 @@ from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from config import get_settings
+from src.logger import get_logger
 
 # HuggingFace 模型下载超时设置（云端首次加载更宽容，避免慢连接直接失败）
 os.environ.setdefault("HF_HUB_DOWNLOAD_TIMEOUT", "60")
+
+logger = get_logger("vector_store")
 
 
 def _resolve_embedding_model() -> str:
@@ -110,13 +113,33 @@ class VectorStoreManager:
         chunk_size: int = 500,
         chunk_overlap: int = 100,
     ) -> int:
-        """添加文档到向量库"""
+        """添加文档到向量库（追加语义，不清理已有数据）。
+
+        注意：Chroma 每次入库生成新 ID，重复调用会把同一批文档重复写入。
+        需要"清空重建"请使用 rebuild()，而不是在业务代码里循环 add_documents。
+        """
         if not documents:
             return 0
 
         split_docs = self.split_documents(documents, chunk_size, chunk_overlap)
         self.vectorstore.add_documents(split_docs)
         return len(split_docs)
+
+    def rebuild(
+        self,
+        documents: List[Document],
+        chunk_size: int = 500,
+        chunk_overlap: int = 100,
+    ) -> int:
+        """清空并重建向量库（幂等：重复构建不会翻倍）。
+
+        为什么：add_documents 每次生成新 ID，若脚本/初始化逻辑多次调用，
+        旧数据不会被覆盖而是一直累积。先 delete_collection() 再入库，
+        保证多次构建结果一致。注意这会丢弃已有向量库（如需保留请勿调用）。
+        """
+        self.clear()  # 删除旧 collection，self._vectorstore 置空以便重建
+        logger.info("已清空旧向量库，开始重建...")
+        return self.add_documents(documents, chunk_size, chunk_overlap)
 
     def similarity_search(
         self,
@@ -164,17 +187,25 @@ class VectorStoreManager:
             filter={"character": character}
         )
 
-    def search_by_category(
+    def mmr_search(
         self,
         query: str,
-        category: str,
         k: int = 3,
+        fetch_k: int = 20,
+        filter: Optional[Dict] = None,
     ) -> List[Document]:
-        """按分类搜索"""
-        return self.vectorstore.similarity_search(
+        """MMR（最大边际相关）重排检索，供实验/评估使用。
+
+        为什么需要：纯相似度检索可能把语义相近但冗余的片段都召回，
+        MMR 在「与查询相关」和「与已选结果互异」之间取平衡，结果更多样。
+        默认不改变现有检索路径（_retrieve_knowledge 仍用纯相似度），
+        需要时通过 fetch_k 控制候选池大小、k 控制最终返回条数。
+        """
+        return self.vectorstore.max_marginal_relevance_search(
             query,
             k=k,
-            filter={"category": category}
+            fetch_k=fetch_k,
+            filter=filter,
         )
 
     def get_retriever(self, k: int = 4):
@@ -188,7 +219,8 @@ class VectorStoreManager:
         """获取文档数量"""
         try:
             return self.vectorstore._collection.count()
-        except:
+        except Exception:
+            # 向量库不存在/未初始化时返回 0，由调用方决定是否触发首次构建
             return 0
 
     def clear(self):
@@ -203,7 +235,7 @@ def load_knowledge_files(knowledge_dir: str = "./data/knowledge") -> List[Docume
     knowledge_path = Path(knowledge_dir)
 
     if not knowledge_path.exists():
-        print(f"知识库目录不存在: {knowledge_dir}")
+        logger.warning(f"知识库目录不存在: {knowledge_dir}")
         return documents
 
     for file_path in knowledge_path.glob("*.txt"):
@@ -251,38 +283,42 @@ def load_knowledge_files(knowledge_dir: str = "./data/knowledge") -> List[Docume
                 }
             )
             documents.append(doc)
-            print(f"  加载: {file_path.name}")
+            logger.info(f"  加载: {file_path.name}")
 
         except Exception as e:
-            print(f"  加载失败 {file_path}: {e}")
+            logger.error(f"  加载失败 {file_path}: {e}")
 
     return documents
 
 
 def build_vector_store():
-    """构建向量数据库"""
-    print("=" * 60)
-    print("构建历史知识向量数据库")
-    print("=" * 60)
+    """构建向量数据库
 
-    print("\n[1] 加载知识文件...")
+    注意：本脚本每次运行都会【清空并重建】向量库（见 VectorStoreManager.rebuild），
+    因此可重复执行且不会重复入库；但请勿在已有自定义向量库时误跑本脚本。
+    """
+    logger.info("=" * 60)
+    logger.info("构建历史知识向量数据库（注意：将清空现有向量库后重建）")
+    logger.info("=" * 60)
+
+    logger.info("\n[1] 加载知识文件...")
     documents = load_knowledge_files()
-    print(f"共加载 {len(documents)} 个文档")
+    logger.info(f"共加载 {len(documents)} 个文档")
 
     if not documents:
-        print("没有文档，请先添加知识文件到 data/knowledge/ 目录")
+        logger.error("没有文档，请先添加知识文件到 data/knowledge/ 目录")
         return
 
-    print("\n[2] 构建向量数据库...")
+    logger.info("\n[2] 构建向量数据库...")
     vs_manager = VectorStoreManager()
-    count = vs_manager.add_documents(documents)
-    print(f"已添加 {count} 个文本块到向量库")
+    count = vs_manager.rebuild(documents)
+    logger.info(f"已添加 {count} 个文本块到向量库")
 
-    print("\n[3] 验证知识库...")
+    logger.info("\n[3] 验证知识库...")
     total = vs_manager.get_document_count()
-    print(f"向量库中共有 {total} 个文档")
+    logger.info(f"向量库中共有 {total} 个文档")
 
-    print("\n[4] 测试检索...")
+    logger.info("\n[4] 测试检索...")
     test_queries = [
         "秦始皇统一六国",
         "李白的诗歌",
@@ -290,14 +326,14 @@ def build_vector_store():
     ]
 
     for query in test_queries:
-        print(f"\n查询: {query}")
+        logger.info(f"\n查询: {query}")
         results = vs_manager.similarity_search(query, k=2)
         for i, doc in enumerate(results, 1):
-            print(f"  [{i}] {doc.metadata.get('title', '未知')}: {doc.page_content[:60]}...")
+            logger.info(f"  [{i}] {doc.metadata.get('title', '未知')}: {doc.page_content[:60]}...")
 
-    print("\n" + "=" * 60)
-    print("知识库构建完成！")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("知识库构建完成！")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

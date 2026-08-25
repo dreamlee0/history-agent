@@ -14,3 +14,8 @@ data/history_chat.db
 *.db
 *.log
 .claude/
+
+# 说明：data/vector_db/（Chroma 向量库二进制）特意【不忽略】，随仓库提交，
+# 以保证云端开箱即用、无需首次启动联网下载模型重建。
+# 更换 Embedding 模型后请删除该目录并运行 scripts/build_vector_db.py 重建
+# （详见 README「部署说明」）。

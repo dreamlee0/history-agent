@@ -5,6 +5,8 @@ Streamlit Web应用 - 历史人物对话
 import os
 import sys
 import hashlib
+import uuid
+import html as html_mod
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -29,19 +31,80 @@ from web.styles import CUSTOM_CSS
 
 
 def get_session_id():
-    """获取浏览器会话标识（稳定，不随 rerun 变化）"""
+    """获取浏览器会话标识（稳定，不随 rerun 变化）。
+
+    优先使用官方 st.context API（Streamlit >= 1.35）；旧版本（本项目钉的
+    1.32.0）没有该 API，回退到 st.runtime.scriptrunner（Streamlit 内部接口，
+    新版本已移除但旧版仍可用）。两者都拿不到会话标识时，生成随机 UUID：
+    避免多个浏览器会话退回到同一个 "default_user" 导致用户之间数据串扰。
+    """
     if "session_id" not in st.session_state:
+        session_id = None
         try:
-            ctx = st.runtime.scriptrunner.get_script_run_ctx()
-            if ctx:
-                st.session_state.session_id = hashlib.md5(
-                    ctx.session_id.encode()
-                ).hexdigest()[:16]
-            else:
-                st.session_state.session_id = "default_user"
+            # 特性探测：st.context 在 Streamlit 1.35+ 提供官方会话上下文
+            ctx = getattr(st, "context", None)
+            if ctx is not None:
+                session_id = getattr(ctx, "session_id", None)
         except Exception:
-            st.session_state.session_id = "default_user"
+            session_id = None
+
+        if not session_id:
+            try:
+                ctx = st.runtime.scriptrunner.get_script_run_ctx()
+                if ctx:
+                    session_id = ctx.session_id
+            except Exception:
+                session_id = None
+
+        if session_id:
+            st.session_state.session_id = hashlib.md5(
+                session_id.encode()
+            ).hexdigest()[:16]
+        else:
+            # 拿不到会话标识（非 Streamlit 环境 / 脚本模式）：
+            # 生成随机 UUID，宁可每次不同也不让所有用户共用同一 ID。
+            st.session_state.session_id = uuid.uuid4().hex[:16]
     return st.session_state.session_id
+
+
+def _render_sources_html(sources: list) -> str:
+    """把来源列表渲染成一行 HTML（标题已转义防 XSS，URL 生成可点击链接）。
+
+    为什么需要：参考资料标题来自知识文件元数据，属外部输入；在
+    unsafe_allow_html=True 下直出会构成存储型 XSS 面，故先 html.escape。
+    URL 非空时渲染为带 rel=noopener 的新窗口链接，方便溯源跳转。
+    """
+    parts = []
+    for src in sources:
+        title = html_mod.escape(src.get("title", "未知"))
+        url = src.get("url", "")
+        if url:
+            url = html_mod.escape(url, quote=True)
+            parts.append(
+                f'<a href="{url}" target="_blank" rel="noopener noreferrer">{title}</a>'
+            )
+        else:
+            parts.append(title)
+    return "参考资料: " + " | ".join(parts)
+
+
+# 最多在 session_state 里缓存多少个角色的消息（防无限增长，见 _prune_stale_messages）
+MAX_CACHED_CHARACTER_MESSAGES = 10
+
+
+def _prune_stale_messages(keep_name: str):
+    """清理不活跃角色的消息缓存，只保留当前角色。
+
+    为什么需要：st.session_state.messages 按角色名累积，长期使用后每个角色
+    的整段对话历史都常驻会话存储，session_state 会无限增长。
+    仅在缓存角色数超过阈值时裁剪一次（保留当前角色、删除其余），
+    避免频繁切换人物时过早丢弃尚未落库的草稿对话。
+    """
+    if len(st.session_state.messages) <= MAX_CACHED_CHARACTER_MESSAGES:
+        return
+    for name in list(st.session_state.messages.keys()):
+        if name != keep_name:
+            del st.session_state.messages[name]
 
 
 def init_app():
@@ -69,26 +132,34 @@ def init_app():
     if "agent_manager" not in st.session_state:
         vector_store = None
         try:
+            from pathlib import Path
+
             vector_store = VectorStoreManager()
-            doc_count = vector_store.get_document_count()
+            chunk_count = vector_store.get_document_count()
 
-            if doc_count == 0:
-                from src.retrievers.vector_store import load_knowledge_files
-                from pathlib import Path
+            # 真实史料文档数 = 知识库目录下的文件数（非 chunk 数），
+            # 用于界面展示；chunk 数是切分后的片段数，两者含义不同。
+            knowledge_dir = Path("./data/knowledge")
+            file_count = (
+                len(list(knowledge_dir.glob("*.txt")))
+                if knowledge_dir.exists()
+                else 0
+            )
 
-                knowledge_dir = Path("./data/knowledge")
-                if knowledge_dir.exists() and list(knowledge_dir.glob("*.txt")):
+            if chunk_count == 0:
+                if knowledge_dir.exists() and file_count:
                     with st.spinner("首次运行，正在构建知识库..."):
+                        from src.retrievers.vector_store import load_knowledge_files
+
                         documents = load_knowledge_files(str(knowledge_dir))
                         if documents:
-                            count = vector_store.add_documents(documents)
-                            doc_count = count
-                            st.success(f"知识库构建完成，共 {count} 个文档")
+                            chunk_count = vector_store.add_documents(documents)
+                            st.success(f"知识库构建完成，共 {file_count} 篇史料文档")
                 else:
                     vector_store = None
-                    doc_count = 0
+                    file_count = 0
 
-            st.session_state.knowledge_count = doc_count
+            st.session_state.knowledge_count = file_count
 
         except Exception as e:
             st.warning(f"知识库初始化失败: {e}")
@@ -162,6 +233,12 @@ def render_sidebar():
                 with col2:
                     if st.button("X", key=f"del_{conv['id']}", help="删除"):
                         db.delete_conversation(conv["id"])
+                        # 同步清理该角色的内存记忆，与「删除对话」按钮语义一致：
+                        # 避免删除后残留上下文在下次聊天/恢复时被复用（内存键=会话:人物，
+                        # 只记录该人物最近活跃的对话）。
+                        agent = st.session_state.agent_manager.get_agent(char_name)
+                        if agent:
+                            agent.clear_memory(session_id=get_session_id())
                         if st.session_state.current_conversation_id == conv["id"]:
                             st.session_state.current_conversation_id = None
                             st.session_state.messages.get(char_name, []).clear()
@@ -184,6 +261,7 @@ def render_sidebar():
                             st.session_state.current_conversation_id = None
                             if char.name not in st.session_state.messages:
                                 st.session_state.messages[char.name] = []
+                            _prune_stale_messages(char.name)
                             st.rerun()
                         st.markdown(f'<div class="char-title">{char.title}</div>', unsafe_allow_html=True)
 
@@ -280,6 +358,7 @@ def render_welcome():
                     st.session_state.current_conversation_id = None
                     if name not in st.session_state.messages:
                         st.session_state.messages[name] = []
+                    _prune_stale_messages(name)
                     st.rerun()
 
 
@@ -292,6 +371,13 @@ def render_character_profile():
     char = character_manager.get_character(char_name)
     if not char:
         return
+
+    # 人物档案内容来自本地 YAML 配置（受信任），但仍在 unsafe_allow_html 下
+    # 做 HTML 转义（纵深防御），与参考资料标题的转义策略一致（L10）。
+    bio = html_mod.escape(char.personality).replace(chr(10), '<br>')
+    quotes = "".join(
+        f'<p class="quote-text">{html_mod.escape(q)}</p>' for q in char.famous_quotes
+    )
 
     st.markdown(f"""
     <div class="character-profile">
@@ -306,10 +392,10 @@ def render_character_profile():
         </div>
         <div class="profile-info-section">
             <div class="info-section-title">人物简介</div>
-            <div class="profile-bio">{char.personality.replace(chr(10), '<br>')}</div>
+            <div class="profile-bio">{bio}</div>
             <div class="quote-container">
                 <div class="info-section-title" style="margin-bottom: 0.5rem;">名言</div>
-                {''.join(f'<p class="quote-text">{q}</p>' for q in char.famous_quotes)}
+                {quotes}
             </div>
         </div>
     </div>
@@ -332,12 +418,9 @@ def render_chat():
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
             if "sources" in msg and msg["sources"]:
-                sources_text = " | ".join([
-                    f"{src.get('title', '未知')}" for src in msg["sources"]
-                ])
                 st.markdown(
                     f'<div style="font-size: 0.75rem; color: #888; margin-top: 0.5rem;">'
-                    f'参考资料: {sources_text}</div>',
+                    f'{_render_sources_html(msg["sources"])}</div>',
                     unsafe_allow_html=True
                 )
 
@@ -363,12 +446,9 @@ def render_chat():
                         st.write(response)
 
                         if sources:
-                            sources_text = " | ".join([
-                                f"{src.get('title', '未知')}" for src in sources
-                            ])
                             st.markdown(
                                 f'<div style="font-size: 0.75rem; color: #888; margin-top: 0.5rem;">'
-                                f'参考资料: {sources_text}</div>',
+                                f'{_render_sources_html(sources)}</div>',
                                 unsafe_allow_html=True
                             )
 
@@ -387,7 +467,13 @@ def render_chat():
         st.markdown("---")
         col1, col2, col3, col4 = st.columns([1, 1, 1, 3])
         with col1:
-            if st.button("清空对话", use_container_width=True):
+            if st.button("删除对话", use_container_width=True):
+                # 语义修正：删除当前对话时连同 SQLite 记录一起删，保持与
+                # 侧边栏历史列表联动，避免"只清 UI/内存、DB 残留"导致
+                # 历史列表里还能点开已"清空"的旧消息。
+                db = st.session_state.db_manager
+                if st.session_state.current_conversation_id:
+                    db.delete_conversation(st.session_state.current_conversation_id)
                 st.session_state.messages[char_name] = []
                 st.session_state.current_conversation_id = None
                 agent = st.session_state.agent_manager.get_agent(char_name)

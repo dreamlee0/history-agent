@@ -37,11 +37,6 @@ def get_connection(db_path: str = DB_PATH):
         conn.close()
 
 
-def get_db() -> "DatabaseManager":
-    """获取数据库管理器实例"""
-    return DatabaseManager()
-
-
 class DatabaseManager:
     """数据库管理器 - 封装所有 CRUD 操作"""
 
@@ -119,22 +114,6 @@ class DatabaseManager:
                 ).fetchall()
             return [dict(row) for row in rows]
 
-    def get_conversation(self, conversation_id: int) -> Optional[Dict]:
-        """获取单个对话"""
-        with get_connection(self.db_path) as conn:
-            row = conn.execute(
-                "SELECT * FROM conversations WHERE id = ?", (conversation_id,)
-            ).fetchone()
-            return dict(row) if row else None
-
-    def update_conversation_time(self, conversation_id: int):
-        """更新对话的最后活跃时间"""
-        with get_connection(self.db_path) as conn:
-            conn.execute(
-                "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-                (conversation_id,),
-            )
-
     def delete_conversation(self, conversation_id: int) -> bool:
         """删除对话及其所有消息"""
         with get_connection(self.db_path) as conn:
@@ -170,6 +149,14 @@ class DatabaseManager:
             )
             return cursor.lastrowid
 
+    def delete_message(self, message_id: int) -> bool:
+        """删除单条消息"""
+        with get_connection(self.db_path) as conn:
+            cursor = conn.execute(
+                "DELETE FROM messages WHERE id = ?", (message_id,)
+            )
+            return cursor.rowcount > 0
+
     def get_messages(self, conversation_id: int) -> List[Dict]:
         """获取对话的所有消息"""
         with get_connection(self.db_path) as conn:
@@ -201,43 +188,43 @@ class DatabaseManager:
                 (session_id,),
             ).fetchone()[0]
 
-            total_messages = conn.execute(
-                """SELECT COUNT(*) FROM messages m
-                   JOIN conversations c ON m.conversation_id = c.id
-                   WHERE c.session_id = ?""",
-                (session_id,),
-            ).fetchone()[0]
-
-            # 最热门人物
-            popular = conn.execute(
-                """SELECT character_name, COUNT(*) as cnt
-                   FROM conversations
-                   WHERE session_id = ?
-                   GROUP BY character_name
-                   ORDER BY cnt DESC LIMIT 5""",
-                (session_id,),
-            ).fetchall()
-
             return {
                 "total_conversations": total_conversations,
-                "total_messages": total_messages,
-                "popular_characters": [
-                    {"name": row[0], "count": row[1]} for row in popular
-                ],
             }
 
-    def search_messages(
-        self, session_id: str, keyword: str, limit: int = 20
-    ) -> List[Dict]:
-        """搜索消息内容"""
+    def restore_recent_messages(
+        self,
+        session_id: str,
+        character_name: str,
+        memory,
+        mem_key: str,
+        max_messages: int = 10,
+    ) -> int:
+        """按 session_id+人物名 从 SQLite 恢复最近 N 条消息到内存记忆。
+
+        为什么需要：内存记忆（conversation_memory）是进程内单例，多进程部署
+        （如 gunicorn 多 worker / Streamlit 多实例）下各进程内存彼此独立、
+        互不可见，不能依赖进程内记忆做跨进程上下文恢复；SQLite 才是唯一
+        可靠来源。
+
+        正确用法（多进程部署）：
+            1. 会话开始时按当前 session_id+人物 调用本方法，把最近 N 条
+               从 SQLite 恢复到当前进程的内存记忆，再交给 LLM 拼上下文；
+            2. 每轮对话后照常写 SQLite（写库是持久的，进程无关）。
+        这样任何进程都能从"冷内存"重建出最近上下文。
+
+        返回恢复的消息条数（0 表示该会话尚无消息）。
+        """
         with get_connection(self.db_path) as conn:
-            rows = conn.execute(
-                """SELECT m.id, m.conversation_id, m.role, m.content, m.created_at,
-                          c.character_name, c.title as conv_title
-                   FROM messages m
-                   JOIN conversations c ON m.conversation_id = c.id
-                   WHERE c.session_id = ? AND m.content LIKE ?
-                   ORDER BY m.created_at DESC LIMIT ?""",
-                (session_id, f"%{keyword}%", limit),
-            ).fetchall()
-            return [dict(row) for row in rows]
+            row = conn.execute(
+                """SELECT id FROM conversations
+                   WHERE session_id = ? AND character_name = ?
+                   ORDER BY updated_at DESC LIMIT 1""",
+                (session_id, character_name),
+            ).fetchone()
+        if not row:
+            return 0
+
+        messages = self.get_messages(row["id"])[-max_messages:]
+        memory.load_from_db(mem_key, messages)
+        return len(messages)

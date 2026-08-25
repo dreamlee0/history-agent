@@ -28,7 +28,10 @@ def make_agent(monkeypatch):
         a.vector_store = None
         a.db = None  # 绕过 __init__，需手动补齐属性
         # 用假回复替代真实 API 调用
-        monkeypatch.setattr(a, "_call_api_with_retry", lambda messages: "（模拟回复）")
+        # （chat 会传入 temperature 关键字参数，mock 需兼容）
+        monkeypatch.setattr(
+            a, "_call_api_with_retry", lambda messages, **kwargs: "（模拟回复）"
+        )
         return a
 
     return _make
@@ -75,3 +78,30 @@ def test_clear_memory_uses_composite_key(make_agent):
     a2 = make_agent("李白")
     a2.chat("记住我喜欢剑", session_id="sessB")
     assert conversation_memory.get_messages("sessB:李白") != []
+
+
+def test_api_failure_rolls_back_user_message(make_agent, monkeypatch):
+    """回归：API 调用失败时，刚写入 DB 的用户消息必须回滚。
+
+    否则对话里会残留"有问无答"的孤儿消息，用户重试时该问题会被当作
+    已答复内容再次注入 LLM 上下文，造成重复提问与上下文错乱。
+    """
+    import tempfile
+    from pathlib import Path
+    from src.database.db import DatabaseManager
+
+    a = make_agent("李白")
+    with tempfile.TemporaryDirectory() as tmp:
+        a.db = DatabaseManager(db_path=str(Path(tmp) / "test.db"))
+
+        def _boom(messages, **kwargs):
+            raise Exception("API挂")
+
+        monkeypatch.setattr(a, "_call_api_with_retry", _boom)
+
+        with pytest.raises(Exception, match="API挂"):
+            a.chat("你好", session_id="sessX")
+
+        convs = a.db.get_conversations("sessX", "李白")
+        assert len(convs) == 1, "应创建一次对话"
+        assert a.db.get_messages(convs[0]["id"]) == [], "API 失败后不应残留用户消息"

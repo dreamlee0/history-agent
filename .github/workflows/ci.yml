@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 运行测试
+        run: pytest tests/ -v
+        # 依赖本地 Embedding 缓存/向量库的用例会自动跳过
+        # （见 tests/conftest.py 的 skip 逻辑），无 API Key 也能跑。

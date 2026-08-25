@@ -6,6 +6,10 @@ from pathlib import Path
 from dataclasses import dataclass, field
 import yaml
 
+from src.logger import get_logger
+
+logger = get_logger("characters")
+
 
 @dataclass
 class HistoricalCharacter:
@@ -81,7 +85,7 @@ class CharacterManager:
                     char = HistoricalCharacter(**data)
                     self._characters[char.name] = char
             except Exception as e:
-                print(f"加载人物配置失败 {file_path}: {e}")
+                logger.error(f"加载人物配置失败 {file_path}: {e}")
 
     def get_character(self, name: str) -> Optional[HistoricalCharacter]:
         """获取人物"""

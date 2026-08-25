@@ -55,3 +55,37 @@ def test_sui_wendi_canal_question(vector_store):
     # 至少要有检索结果，且来源必须是隋朝相关人物（文帝或炀帝）
     assert srcs, "隋文帝大运河问题检索为空"
     assert any(c in ("隋文帝", "隋炀帝") for c in srcs)
+
+
+# ─── filtered_score_ratio 阈值边界测试（纯逻辑，不依赖向量库/embedding）───
+
+def _plain_agent(name="李白"):
+    """构造一个仅含 settings/character 的 Agent（不依赖向量库）"""
+    from config import get_settings
+    from src.agents import HistoryCharacterAgent
+
+    char = character_manager.get_character(name)
+    agent = HistoryCharacterAgent.__new__(HistoryCharacterAgent)
+    agent.settings = get_settings()
+    agent.character = char
+    return agent
+
+
+def test_filtered_ratio_equals_threshold_keeps_filtered():
+    """边界：过滤结果分数刚好等于阈值（best_global * ratio）→ 保留人物聚焦结果"""
+    agent = _plain_agent()
+    ratio = agent.settings.filtered_score_ratio
+    assert agent._should_use_filtered(best_filtered=1.0 * ratio, best_global=1.0) is True
+
+
+def test_filtered_ratio_clearly_worse_falls_back_to_global():
+    """明显劣于阈值（> best_global * ratio）→ 退回全局检索"""
+    agent = _plain_agent()
+    ratio = agent.settings.filtered_score_ratio
+    assert agent._should_use_filtered(best_filtered=1.0 * ratio + 0.5, best_global=1.0) is False
+
+
+def test_filtered_ratio_no_global_keeps_filtered():
+    """全局检索无结果时，保留人物聚焦结果"""
+    agent = _plain_agent()
+    assert agent._should_use_filtered(best_filtered=999.0, best_global=None) is True

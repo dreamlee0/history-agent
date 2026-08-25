@@ -38,11 +38,14 @@ def export_to_markdown(
         lines.append(f"### {role}\n")
         lines.append(f"{content}\n")
 
-        # 参考来源
+        # 参考来源（url 非空时导出为可点击链接文本）
         if "sources" in msg and msg["sources"]:
-            lines.append("*参考资料*: " + " | ".join([
-                src.get("title", "未知") for src in msg["sources"]
-            ]) + "\n")
+            refs = []
+            for src in msg["sources"]:
+                title = src.get("title", "未知")
+                url = src.get("url", "")
+                refs.append(f"[{title}]({url})" if url else title)
+            lines.append("*参考资料*: " + " | ".join(refs) + "\n")
 
         lines.append("---\n")
 
@@ -106,8 +109,10 @@ def export_to_pdf(
         bottomMargin=2*cm
     )
 
-    # 注册中文字体 - 优先使用系统字体，回退到 CID 字体
+    # 注册中文字体 - 优先使用系统字体，回退到 CID 字体。
+    # system_font_available 记录是否存在系统字体，供导出失败时给出安装提示（M10）。
     font_name = _register_chinese_font()
+    system_font_available = bool(font_name)
     if not font_name:
         # 使用 reportlab 内置的 CID 中文字体（无需外部字体文件）
         pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
@@ -189,13 +194,32 @@ def export_to_pdf(
         story.append(Paragraph(content, body_style))
 
         if "sources" in msg and msg["sources"]:
-            sources = " | ".join([src.get("title", "未知") for src in msg["sources"]])
+            refs = []
+            for src in msg["sources"]:
+                title = src.get("title", "未知")
+                url = src.get("url", "")
+                # 转义 XML 特殊字符，防止标题/URL 破坏 reportlab 段落
+                safe_title = (
+                    title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                )
+                # url 非空时作为链接文本一并导出（M6）
+                refs.append(f"{safe_title} ({url})" if url else safe_title)
+            sources = " | ".join(refs)
             story.append(Paragraph(f"<i>参考资料: {sources}</i>", meta_style))
 
         story.append(Spacer(1, 0.3*cm))
 
-    # 生成PDF
-    doc.build(story)
+    try:
+        # 生成PDF
+        doc.build(story)
+    except Exception as e:
+        # 导出失败时，若系统缺少中文字体则附上安装提示（M10），
+        # 避免用户面对裸异常无从下手。
+        hint = ""
+        if not system_font_available:
+            hint = ("；系统中文字体缺失，请安装文泉驿（Linux: apt install fonts-wqy-zenhei）"
+                    "/ 微软雅黑（Windows）")
+        raise Exception(f"PDF导出失败: {e}{hint}") from e
     buffer.seek(0)
     return buffer.getvalue()
 

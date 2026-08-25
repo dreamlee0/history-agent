@@ -1,16 +1,24 @@
 """
-历史人物对话Agent - 集成RAG知识检索 + SQLite持久化
+历史人物对话系统（RAG 对话机器人） - 集成RAG知识检索 + SQLite持久化
 支持知识溯源，回复时引用史料来源
+
+说明：本项目本质是「检索增强(RAG)的对话应用」，不包含工具调用/规划/推理链，
+因此模块文档统一表述为"历史人物对话系统 / RAG 对话机器人"而非"Agent"。
+类名 HistoryCharacterAgent 予以保留，以兼容既有 import 与测试。
 """
 from typing import List, Optional, Tuple
 from dataclasses import dataclass
 import time
 
 from langchain_core.documents import Document
+from langchain_core.messages import HumanMessage
 
 from config import get_settings
 from src.characters import HistoricalCharacter, character_manager
 from src.memory import conversation_memory
+from src.logger import get_logger
+
+logger = get_logger("history_agent")
 
 # OpenAI兼容 SDK (可接智谱/DeepSeek/OpenAI等)
 try:
@@ -29,14 +37,8 @@ class RAGContext:
     sources: List[dict]
 
 
-# 过滤结果相关性阈值：当按人物过滤的最优结果距离
-# 明显劣于全局最优结果（大于该倍数）时，判定用户问题与本人物无关，
-# 退回全局检索，避免把当事人自己的传记误当"相关史料"注入。
-FILTERED_SCORE_RATIO = 1.25
-
-
 class HistoryCharacterAgent:
-    """历史人物对话Agent - 支持RAG知识增强 + 持久化"""
+    """历史人物对话系统（RAG 对话机器人） - 支持RAG知识增强 + 持久化"""
 
     def __init__(
         self,
@@ -87,7 +89,7 @@ class HistoryCharacterAgent:
                 best_filtered = filtered[0][1]
                 best_global = global_results[0][1] if global_results else None
                 # 过滤结果不比全局最优差太多时，保留人物聚焦的结果
-                if best_global is None or best_filtered <= best_global * FILTERED_SCORE_RATIO:
+                if self._should_use_filtered(best_filtered, best_global):
                     docs = [d for d, _ in filtered]
 
             if docs is None and global_results:
@@ -121,8 +123,19 @@ class HistoryCharacterAgent:
             )
 
         except Exception as e:
-            print(f"RAG检索错误: {e}")
+            logger.warning(f"RAG检索错误: {e}")
             return None
+
+    def _should_use_filtered(self, best_filtered: float, best_global: Optional[float]) -> bool:
+        """判断按人物过滤的结果是否值得保留（分数为距离，越小越相关）。
+
+        过滤结果明显劣于全局最优（best_filtered > best_global * filtered_score_ratio）
+        时，判定用户问题与本人物无关，退回全局检索，避免把当事人自己的传记
+        误当"相关史料"注入。阈值来自 Settings.filtered_score_ratio，可配置。
+        """
+        if best_global is None:
+            return True
+        return best_filtered <= best_global * self.settings.filtered_score_ratio
 
     def _build_system_prompt(self, rag_context: Optional[RAGContext] = None) -> str:
         """构建系统提示词"""
@@ -155,29 +168,75 @@ class HistoryCharacterAgent:
 """
         return base_prompt
 
-    def _call_api_with_retry(self, messages: list, max_retries: int = 3) -> str:
-        """带重试机制的 API 调用"""
+    @staticmethod
+    def _is_retryable_error(e: Exception) -> bool:
+        """判断错误是否属于瞬时性错误（值得重试）。
+
+        为什么需要区分：对 4xx（400/401/403/404 等确定性错误）重试毫无意义，
+        只会放大延迟与成本；只有网络连接/超时、5xx 服务端错误、429 限流
+        这类瞬时错误才值得退避重试。注意要把 429 归入可重试（限流是暂时的）。
+        """
+        import openai
+        if isinstance(
+            e, (openai.APIConnectionError, openai.APITimeoutError, openai.RateLimitError)
+        ):
+            return True
+        status = getattr(e, "status_code", None)
+        if isinstance(status, int):
+            return status >= 500 or status == 429
+        # 非 openai 异常：按网络错误关键字兜底判断
+        msg = str(e).lower()
+        return "connection" in msg or "timeout" in msg
+
+    def _call_api_with_retry(
+        self,
+        messages: list,
+        max_retries: int = 3,
+        temperature: Optional[float] = None,
+    ) -> str:
+        """带重试机制的 API 调用。
+
+        temperature 为 None 时使用 settings.temperature；
+        史实问答（有 RAG 史料命中）时应传 settings.temperature_factual。
+        仅对瞬时错误重试（见 _is_retryable_error），4xx 立即抛出；
+        返回内容为空（None/空白串）时重试一次，仍为空则抛带提示的异常，
+        避免上层把 None 直接拼进 f-string 或写入 DB。
+        """
+        if temperature is None:
+            temperature = self.settings.temperature
+
         for attempt in range(max_retries):
             try:
                 response = self.client.chat.completions.create(
                     model=self.settings.llm_model,
                     messages=messages,
-                    temperature=self.settings.temperature,
+                    temperature=temperature,
                 )
-                return response.choices[0].message.content
             except Exception as e:
                 error_msg = str(e)
+                if not self._is_retryable_error(e):
+                    # 确定性错误（4xx 等）：重试无意义，立即抛出
+                    raise Exception(f"API调用失败: {error_msg}")
                 if attempt < max_retries - 1:
                     wait_time = 2 ** attempt  # 指数退避
                     time.sleep(wait_time)
                     continue
-                # 最后一次重试失败
+                # 最后一次重试也失败（瞬时错误持续存在）
                 if "Connection" in error_msg or "timeout" in error_msg.lower():
                     raise Exception(f"API连接失败，请检查网络或API Key配置。错误: {error_msg}")
                 elif "api_key" in error_msg.lower() or "unauthorized" in error_msg.lower():
                     raise Exception(f"API Key无效或未配置。请在Streamlit Cloud的Secrets中设置LLM_API_KEY")
                 else:
                     raise Exception(f"API调用失败: {error_msg}")
+
+            content = response.choices[0].message.content
+            if content is None or not content.strip():
+                # 模型返回空内容：再试一次（可能是瞬时异常），仍空则明确报错
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)
+                    continue
+                raise Exception("模型返回了空内容，请重试")
+            return content
 
     def chat(
         self,
@@ -211,9 +270,10 @@ class HistoryCharacterAgent:
             conversation_memory.load_from_db(mem_key, db_messages)
             history = conversation_memory.get_messages(mem_key)
 
-        # 保存用户消息
+        # 保存用户消息（记录 id，API 失败时回滚，见下方 except）
+        user_msg_id = None
         if self.db and conversation_id:
-            self.db.add_message(conversation_id, "user", user_input)
+            user_msg_id = self.db.add_message(conversation_id, "user", user_input)
 
         # RAG检索
         rag_context = self._retrieve_knowledge(user_input)
@@ -225,13 +285,29 @@ class HistoryCharacterAgent:
 
         for msg in history:
             if hasattr(msg, 'content'):
-                role = "user" if msg.__class__.__name__ == "HumanMessage" else "assistant"
+                # 用 isinstance 判定角色（比 __class__.__name__ 字符串比较更可靠，
+                # 且兼容子类实例）
+                role = "user" if isinstance(msg, HumanMessage) else "assistant"
                 messages.append({"role": role, "content": msg.content})
 
         messages.append({"role": "user", "content": user_input})
 
-        # 调用 API（带重试）
-        result = self._call_api_with_retry(messages)
+        # 调用 API（带重试）。有 RAG 史料命中时用更低的 factual 温度
+        # 以贴近史实、减少编造；无史料（闲聊/常识）用默认温度更自然。
+        temperature = (
+            self.settings.temperature_factual
+            if rag_context
+            else self.settings.temperature
+        )
+        try:
+            result = self._call_api_with_retry(messages, temperature=temperature)
+        except Exception:
+            # 回滚刚写入的用户消息，避免"有问无答"的孤儿消息留在对话里：
+            # 否则用户重试时，该问题会被当作已答复内容再次注入上下文，
+            # 造成重复提问、上下文错乱。
+            if user_msg_id is not None:
+                self.db.delete_message(user_msg_id)
+            raise
 
         # 保存助手消息
         sources = rag_context.sources if rag_context else []
@@ -258,7 +334,7 @@ class HistoryCharacterAgent:
 
 
 class AgentManager:
-    """Agent管理器"""
+    """对话机器人管理器（按人物缓存 HistoryCharacterAgent 实例）"""
 
     def __init__(self, vector_store=None, db_manager=None):
         self.vector_store = vector_store
@@ -266,7 +342,7 @@ class AgentManager:
         self._agents: dict[str, HistoryCharacterAgent] = {}
 
     def get_agent(self, character_name: str) -> Optional[HistoryCharacterAgent]:
-        """获取或创建Agent"""
+        """获取或创建对话机器人"""
         if character_name in self._agents:
             return self._agents[character_name]
 
@@ -281,8 +357,3 @@ class AgentManager:
     def list_characters(self) -> List[str]:
         """列出所有可用人物"""
         return character_manager.list_names()
-
-    def set_vector_store(self, vector_store):
-        """设置向量存储"""
-        self.vector_store = vector_store
-        self._agents.clear()

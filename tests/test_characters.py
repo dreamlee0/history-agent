@@ -4,7 +4,7 @@ from pathlib import Path
 from src.characters import character_manager
 from src.characters.character_manager import DYNASTY_ORDER
 
-# 当前 YAML 人物总数（README 写的 96 与实际情况不一致，见 test_doc_consistency）
+# 当前 YAML 人物总数（README 与测试口径一致，均为 97）
 TOTAL_CHARACTERS = 97
 
 

@@ -1,9 +1,9 @@
-# 🏛️ 历史人物对话 Agent
+# 🏛️ 历史人物对话系统
 
-> 基于 LangChain + RAG 的历史人物对话系统，可以与中国历史人物进行沉浸式对话。
+> 基于 LangChain + RAG 的历史人物对话系统（RAG 对话机器人），可以与中国历史人物进行沉浸式对话。
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
-[![LangChain](https://img.shields.io/badge/LangChain-0.2+-green.svg)](https://langchain.com)
+[![LangChain](https://img.shields.io/badge/LangChain-1.2-green.svg)](https://langchain.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
@@ -32,7 +32,7 @@
 
 ## ✨ 功能特点
 
-- 🎭 **角色扮演** - 97位历史人物，覆盖20个朝代，真实还原人物性格和说话风格
+- 🎭 **角色扮演** - 97位历史人物，覆盖21个朝代（三国拆为蜀汉/东吴/曹魏），真实还原人物性格和说话风格
 - 📚 **RAG知识增强** - 基于真实史料回答问题，支持知识溯源
 - 💬 **多轮对话** - 支持上下文记忆，连贯对话
 - 💾 **对话持久化** - SQLite 存储对话历史，刷新不丢失
@@ -70,12 +70,12 @@ streamlit run web/app.py
 
 | 层级 | 技术 |
 |------|------|
-| **Agent框架** | LangChain |
+| **框架** | LangChain |
 | **大语言模型** | 智谱AI GLM-4 |
 | **向量数据库** | Chroma |
 | **对话存储** | SQLite |
 | **Web界面** | Streamlit |
-| **Embedding** | 智谱AI Embedding-3 |
+| **Embedding** | 本地 BAAI/bge-small-zh-v1.5 |
 
 ## 📁 项目结构
 
@@ -108,10 +108,9 @@ history-agent/
 │   └── vector_db/           # Chroma向量数据库
 ├── scripts/                 # 工具脚本
 ├── src/
-│   ├── agents/              # 对话Agent
+│   ├── agents/              # 历史人物对话系统（RAG 对话机器人）
 │   ├── characters/          # 人物管理器
 │   ├── database/            # SQLite数据库
-│   ├── loaders/             # 文档加载器
 │   ├── memory/              # 对话记忆
 │   └── retrievers/          # 向量检索
 ├── web/
@@ -172,6 +171,32 @@ history-agent/
 | EMBEDDING_MODEL | Embedding模型（本地 HuggingFace） | BAAI/bge-small-zh-v1.5 |
 | VECTOR_DB_PATH | 向量数据库路径 | ./data/vector_db |
 | DB_PATH | 对话数据库路径 | ./data/history_chat.db |
+| MAX_HISTORY | 注入 LLM 上下文的历史消息条数 | 10 |
+
+## ⚠️ 部署说明
+
+### 安全警示
+本项目**默认无鉴权**，所有访问者共享同一个 SQLite 对话库（`data/history_chat.db`），
+会话隔离仅靠浏览器会话 ID。**仅适合个人使用或内网演示**；如需公网部署，请自行
+增加鉴权（可在 `web/app.py` 顶部通过 `st.secrets` 配置可选密码），并确认
+`.streamlit/config.toml` 中 `enableXsrfProtection` 保持开启。
+
+### 冷启动与 Embedding 模型缓存（M9）
+每次冷启动会加载本地 Embedding 模型 `BAAI/bge-small-zh-v1.5`，首次运行需从
+HuggingFace 下载并缓存到本地（`~/.cache/huggingface`），之后走本地快照加载。
+云平台（如 Streamlit Cloud）每次冷启动环境可能被重置、无持久磁盘，请优先使用
+提供持久化缓存目录的方案，或接受首次启动较慢。
+
+### 更换 Embedding 模型后需重建向量库（L5）
+`data/vector_db/` 为向量库二进制，随仓库提交以保证云端开箱即用。**更换
+Embedding 模型后必须删除 `data/vector_db` 并运行 `python scripts/build_vector_db.py`
+重建**（该脚本每次运行都会清空并重建，可重复执行，不会重复入库）。
+
+### 对话记忆策略（M2 / H3）
+当前对话记忆为「最近 N 条」策略（默认 10 条，可用环境变量 `MAX_HISTORY` 调整），
+超出的历史消息会从 LLM 上下文中丢弃，不进行摘要压缩。**注意**：内存记忆是进程内
+单例，多进程部署（gunicorn 多 worker / Streamlit 多实例）时各进程内存互不可见，
+上下文恢复以 SQLite 为准（见 `src/database/db.py` 的 `restore_recent_messages`）。
 
 ## 📄 License
 
