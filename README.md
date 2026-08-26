@@ -64,7 +64,7 @@ streamlit run web/app.py
 ```
 
 本地访问：http://localhost:8501
-在线访问：[history-agent.streamlit.app/](https://history-agent.streamlit.app/)
+在线访问：[[history-agent.streamlit.app/](https://history-agent.streamlit.app/)](https://history-rag-chat.streamlit.app/)
 
 ## 🛠️ 技术栈
 
