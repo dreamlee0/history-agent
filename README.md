@@ -49,8 +49,8 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/dreamlee0/history-agent.git
-cd history-agent
+git clone https://github.com/dreamlee0/history-rag-chat.git
+cd history-rag-chat
 
 # 安装依赖
 pip install -r requirements.txt
@@ -64,7 +64,7 @@ streamlit run web/app.py
 ```
 
 本地访问：http://localhost:8501
-在线访问：[history-agent.streamlit.app/](https://history-agent.streamlit.app/)
+在线访问：[history-rag-chat.streamlit.app/](https://history-rag-chat.streamlit.app/)
 
 ## 🛠️ 技术栈
 
@@ -80,7 +80,7 @@ streamlit run web/app.py
 ## 📁 项目结构
 
 ```
-history-agent/
+history-rag-chat/
 ├── config/                  # 配置管理
 │   └── settings.py
 ├── data/
@@ -172,6 +172,38 @@ history-agent/
 | VECTOR_DB_PATH | 向量数据库路径 | ./data/vector_db |
 | DB_PATH | 对话数据库路径 | ./data/history_chat.db |
 | MAX_HISTORY | 注入 LLM 上下文的历史消息条数 | 10 |
+| FILTERED_SCORE_RATIO | 防跨人物污染阈值（见「评测」） | 1.20 |
+| RETRIEVAL_MODE | 检索模式：`similarity` \| `mmr`（最大边际相关重排） | similarity |
+| CONVERSATION_RETENTION_DAYS | 对话保留天数，超过则由 `scripts/cleanup_db.py` 清理；0=不清理 | 0 |
+
+## 📏 评测（方法论：给检索装上"尺子"）
+
+项目自带**标注评测集 + 评测脚本**，把"防污染做得好不好"从"相信"变成"可量化"：
+
+- **标注集**：`data/eval/retrieval_eval.json`（26 条，含三类：`same` 问自己 / `cross`
+  问他人 / `event` 问事件；`cross` 中刻意埋了"当事人自传是陷阱"的用例，如隋文帝问大运河）。
+- **指标**：hit@1 / hit@3 / MRR（期望人物是否进入检索结果及排位）+ 防污染门决策正确率。
+- **阈值扫描**：`--sweep` 在 `filtered_score_ratio ∈ [1.0, 2.0]` 上重放决策，给出最优阈值，
+  `filtered_score_ratio=1.20` 的默认值即由该数据标定（26 条上决策正确率 1.00，1.25 时为 0.962，
+  恰漏"大运河陷阱"一项）。
+- **引用校验（可选，付费）**：`--llm-grounding N` 真实调用 LLM 走完整对话，统计回答引用史料的
+  比例与引用命中期望人物的比例。
+
+```bash
+python scripts/evaluate_retrieval.py          # 检索层指标（无需 API Key，本地即可跑）
+python scripts/evaluate_retrieval.py --sweep  # 追加阈值扫描
+python scripts/evaluate_retrieval.py --llm-grounding 5   # 可选：真实 LLM 引用校验（需 Key，付费）
+```
+
+> 注意：评测集为小规模标定集（26 条、查询刻意无歧义），用于**回归监控**与**阈值标定**，
+> 不是完整的 benchmark。扩展标注集后重跑脚本即可持续观察检索质量。
+
+## ✅ 引用可验证（grounding 硬化）
+
+有史料命中时，模型被要求输出结构化 JSON `{"reply": ..., "cited_sources": [索引]}`，
+代码侧**校验索引落在本次检索集合内**才渲染为【参考史料】，越界引用一律丢弃；
+解析失败自动回退纯文本，不阻塞对话。因此"引用不存在的文献"不会再进入渲染/落库
+（详见 `src/agents/history_agent.py` 的 `_parse_structured_reply` / `_validate_cited`）。
 
 ## ⚠️ 部署说明
 
@@ -196,7 +228,18 @@ Embedding 模型后必须删除 `data/vector_db` 并运行 `python scripts/build
 当前对话记忆为「最近 N 条」策略（默认 10 条，可用环境变量 `MAX_HISTORY` 调整），
 超出的历史消息会从 LLM 上下文中丢弃，不进行摘要压缩。**注意**：内存记忆是进程内
 单例，多进程部署（gunicorn 多 worker / Streamlit 多实例）时各进程内存互不可见，
-上下文恢复以 SQLite 为准（见 `src/database/db.py` 的 `restore_recent_messages`）。
+上下文恢复以 SQLite 为准：`chat()` 在内存为空、携带 `conversation_id` 续聊时，
+会经 `restore_recent_messages` 从 SQLite 冷启动恢复最近 N 条。
+
+### 对话库清理（无归档策略的补丁）
+`conversations/messages` 表会无限增长。设置 `CONVERSATION_RETENTION_DAYS`（默认 0=不清理）
+后，运行 `python scripts/cleanup_db.py`（可配 `--days N` / `--dry-run`，建议由 cron 定时执行）
+即可按更新时间删除过期对话。
+
+### 检索模式（默认相似度，可选 MMR）
+默认 `RETRIEVAL_MODE=similarity` 保持既有行为；当史料规模扩大（数千篇）后，可切
+`RETRIEVAL_MODE=mmr` 用最大边际相关重排提升召回多样性（防跨人物污染决策仍基于
+相似度分数，不受切换影响）。
 
 ## 📄 License
 

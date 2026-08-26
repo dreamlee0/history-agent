@@ -6,7 +6,7 @@
 |------|------|
 | 文档状态 | 2026-08-14 依据当前代码库编写 |
 | 代码位置 | `/home/tjut_lixiang/web-learning/agent/agent-make` |
-| 项目性质 | 学习复现 + 工程化改造的完整 Agent 项目（fork 自 `dreamlee0/history-agent`） |
+| 项目性质 | 学习复现 + 工程化改造的完整 Agent 项目（fork 自 `dreamlee0/history-rag-chat`） |
 
 ---
 

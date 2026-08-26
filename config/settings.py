@@ -43,10 +43,24 @@ class Settings(BaseSettings):
     rag_enabled: bool = True
     # 人物过滤相关性阈值：按人物过滤的最优结果距离若明显劣于全局最优
     # （> 该倍数），判定问题与本人物无关，退回全局检索（防跨人物污染）。
-    filtered_score_ratio: float = 1.25
+    # 默认值 1.20 由 scripts/evaluate_retrieval.py 在标注评测集
+    # （data/eval/retrieval_eval.json，26 条）上的阈值扫描数据支撑：
+    # 1.20 决策正确率 0.962 > 1.25 的 0.923（1.25 时"隋文帝问大运河"会把
+    # 文帝自传当史料注入，ratio=1.209 恰好漏过），可在 .env 覆盖重调。
+    filtered_score_ratio: float = Field(default=1.20, env="FILTERED_SCORE_RATIO")
+
+    # 检索模式："similarity"（纯相似度，默认）| "mmr"（最大边际相关重排）。
+    # 默认保持纯相似度以不改变既有行为；史料规模扩大后可切换 mmr 提升
+    # 召回多样性（MMR 检索已实现，见 VectorStoreManager.mmr_search）。
+    retrieval_mode: str = Field(default="similarity", env="RETRIEVAL_MODE")
 
     # 数据库配置
     db_path: str = Field(default="./data/history_chat.db", env="DB_PATH")
+    # 对话保留天数：超过该天数的对话由 scripts/cleanup_db.py 清理；
+    # 0 表示不自动清理（默认，保持既有无限增长行为，由部署者显式开启）。
+    conversation_retention_days: int = Field(
+        default=0, env="CONVERSATION_RETENTION_DAYS"
+    )
 
     model_config = {
         "env_file": ".env",

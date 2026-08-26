@@ -199,6 +199,7 @@ class DatabaseManager:
         memory,
         mem_key: str,
         max_messages: int = 10,
+        conversation_id: Optional[int] = None,
     ) -> int:
         """按 session_id+人物名 从 SQLite 恢复最近 N 条消息到内存记忆。
 
@@ -213,18 +214,45 @@ class DatabaseManager:
             2. 每轮对话后照常写 SQLite（写库是持久的，进程无关）。
         这样任何进程都能从"冷内存"重建出最近上下文。
 
+        conversation_id 传入时，从该指定对话恢复（chat() 携带 conversation_id
+        续聊的场景）；缺省时恢复该 session+人物 最近更新的一条对话。
+
         返回恢复的消息条数（0 表示该会话尚无消息）。
         """
         with get_connection(self.db_path) as conn:
-            row = conn.execute(
-                """SELECT id FROM conversations
-                   WHERE session_id = ? AND character_name = ?
-                   ORDER BY updated_at DESC LIMIT 1""",
-                (session_id, character_name),
-            ).fetchone()
+            if conversation_id is not None:
+                row = conn.execute(
+                    "SELECT id FROM conversations WHERE id = ?",
+                    (conversation_id,),
+                ).fetchone()
+            else:
+                row = conn.execute(
+                    """SELECT id FROM conversations
+                       WHERE session_id = ? AND character_name = ?
+                       ORDER BY updated_at DESC LIMIT 1""",
+                    (session_id, character_name),
+                ).fetchone()
         if not row:
             return 0
 
         messages = self.get_messages(row["id"])[-max_messages:]
         memory.load_from_db(mem_key, messages)
         return len(messages)
+
+    def purge_old_conversations(self, days: int) -> int:
+        """删除超过 days 天未更新的对话及其消息，返回删除的对话数。
+
+        为什么需要：对话表会无限增长，多用户长期使用后积累无价值的旧记录；
+        提供按更新时间清理的策略（由 scripts/cleanup_db.py 或部署方定时调用）。
+        依赖 messages 的外键 ON DELETE CASCADE，删对话即连带删消息。
+        days <= 0 时视为禁用（不删除任何数据）。
+        """
+        if days <= 0:
+            return 0
+        with get_connection(self.db_path) as conn:
+            cursor = conn.execute(
+                """DELETE FROM conversations
+                   WHERE updated_at < datetime('now', ?)""",
+                (f"-{days} days",),
+            )
+            return cursor.rowcount

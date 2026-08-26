@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "version": 1,
+    "created": "2026-08-26",
+    "purpose": "检索层标注评测集：为 scripts/evaluate_retrieval.py 提供 hit@k/MRR 与 filtered_score_ratio 阈值的数据支撑（见 README「评测」）。",
+    "matching_rule": "hit 判定 = 期望人物 character 出现在检索结果 sources[i].character 中（含事件文件，其 character 标注为当事人）。",
+    "type_same": "问自己 → 过滤路径应保留（期望 == asker）",
+    "type_cross": "问他人 → 应退回全局检索命中他人史料（期望 != asker）",
+    "type_event": "问历史事件 → 事件文件已标注当事人，期望命中该当事人"
+  },
+  "items": [
+    {"asker": "李白", "query": "你最著名的诗作《将进酒》的创作背景是怎样的", "expected": "李白", "type": "same", "note": "问自己，过滤应保留"},
+    {"asker": "杜甫", "query": "你的《三吏》《三别》反映了怎样的时代背景", "expected": "杜甫", "type": "same", "note": "问自己"},
+    {"asker": "苏轼", "query": "介绍一下你的人生经历和代表词作", "expected": "苏轼", "type": "same", "note": "问自己"},
+    {"asker": "孔子", "query": "你的核心思想仁与礼的关系是什么", "expected": "孔子", "type": "same", "note": "问自己"},
+    {"asker": "岳飞", "query": "你抗击金军的主要事迹有哪些", "expected": "岳飞", "type": "same", "note": "问自己"},
+    {"asker": "秦始皇", "query": "你统一六国后推行了哪些主要举措", "expected": "秦始皇", "type": "same", "note": "问自己"},
+    {"asker": "王阳明", "query": "你的心学核心主张是什么", "expected": "王阳明", "type": "same", "note": "问自己"},
+    {"asker": "武则天", "query": "你作为中国历史上唯一的女皇帝的主要政绩", "expected": "武则天", "type": "same", "note": "问自己"},
+    {"asker": "康熙", "query": "你平定三藩之乱的过程是怎样的", "expected": "康熙", "type": "same", "note": "问自己"},
+    {"asker": "郑和", "query": "你七下西洋的航线与意义", "expected": "郑和", "type": "same", "note": "问自己"},
+    {"asker": "林则徐", "query": "虎门销烟的背景和影响", "expected": "林则徐", "type": "same", "note": "问自己"},
+    {"asker": "唐太宗", "query": "你开创贞观之治的主要措施", "expected": "唐太宗", "type": "same", "note": "问自己"},
+    {"asker": "屈原", "query": "你的《离骚》与楚辞的关系", "expected": "屈原", "type": "same", "note": "问自己"},
+    {"asker": "徐霞客", "query": "你游历考察的主要贡献是什么", "expected": "徐霞客", "type": "same", "note": "问自己"},
+    {"asker": "曹操", "query": "官渡之战的具体经过是怎样的", "expected": "曹操", "type": "event", "note": "事件文件人物=曹操"},
+    {"asker": "诸葛亮", "query": "赤壁之战的经过与各方角色", "expected": "诸葛亮", "type": "event", "note": "事件文件人物=诸葛亮"},
+    {"asker": "李白", "query": "介绍一下杜甫的生平和诗歌成就", "expected": "杜甫", "type": "cross", "note": "问他人，必须退回全局，不得把李白传记当史料"},
+    {"asker": "苏轼", "query": "陆游的爱国诗作有什么特点", "expected": "陆游", "type": "cross", "note": "问他人"},
+    {"asker": "孔子", "query": "介绍一下老子的道家思想", "expected": "老子", "type": "cross", "note": "问他人"},
+    {"asker": "岳飞", "query": "介绍一下韩信的军事才能", "expected": "韩信", "type": "cross", "note": "问他人"},
+    {"asker": "隋文帝", "query": "开凿大运河的经过和影响", "expected": "隋炀帝", "type": "cross", "note": "问他人，文帝传记是陷阱"},
+    {"asker": "曹操", "query": "刘备的仁德形象与蜀汉的建立", "expected": "刘备", "type": "cross", "note": "问他人，曹操传记是陷阱"},
+    {"asker": "武则天", "query": "介绍一下唐太宗的贞观之治", "expected": "唐太宗", "type": "cross", "note": "问他人"},
+    {"asker": "苏轼", "query": "王维的诗中有画指的是什么", "expected": "王维", "type": "cross", "note": "问他人"},
+    {"asker": "诸葛亮", "query": "孙武的《孙子兵法》核心军事思想是什么", "expected": "孙武", "type": "cross", "note": "问他人，与诸葛亮无关（原周瑜赤壁一条与诸葛亮赤壁事件文档语义相近、标签有歧义，换成更干净的 cross 项）"},
+    {"asker": "唐太宗", "query": "介绍一下玄奘西行取经的事迹", "expected": "玄奘", "type": "cross", "note": "问他人"}
+  ]
+}
