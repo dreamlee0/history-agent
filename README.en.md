@@ -44,7 +44,7 @@ Try it live: [history-rag-chat.streamlit.app](https://history-rag-chat.streamlit
 git clone https://github.com/dreamlee0/history-rag-chat.git
 cd history-rag-chat
 pip install -r requirements.txt
-cp .env.example .env          # set LLM_API_KEY (Zhipu AI or any OpenAI-compatible endpoint)
+cp .env.example .env          # set LLM_API_KEY (DeepSeek or any OpenAI-compatible endpoint)
 streamlit run web/app.py
 ```
 
@@ -53,7 +53,7 @@ streamlit run web/app.py
 | Component | Description |
 |---|---|
 | LangChain + Chroma | RAG retrieval |
-| Zhipu GLM-4.5-flash | LLM (OpenAI-compatible) |
+| DeepSeek deepseek-v4-flash | LLM (OpenAI-compatible) |
 | BAAI/bge-small-zh-v1.5 | Local embeddings (free, no API key) |
 | SQLite + Streamlit | Persistence / Web UI |
 
@@ -146,9 +146,9 @@ Confucius: The way of the junzi lies in cultivating oneself, harmonizing the fam
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| LLM_API_KEY | Zhipu AI API key (or any OpenAI-compatible key) | - |
-| LLM_BASE_URL | LLM endpoint | https://open.bigmodel.cn/api/paas/v4 |
-| LLM_MODEL | Model name | glm-4.5-flash |
+| LLM_API_KEY | DeepSeek API key (or any OpenAI-compatible key) | - |
+| LLM_BASE_URL | LLM endpoint | https://api.deepseek.com |
+| LLM_MODEL | Model name | deepseek-v4-flash |
 | EMBEDDING_MODEL | Embedding model (local HuggingFace) | BAAI/bge-small-zh-v1.5 |
 | VECTOR_DB_PATH | Vector DB path | ./data/vector_db |
 | DB_PATH | Chat DB path | ./data/history_chat.db |

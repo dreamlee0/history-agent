@@ -44,7 +44,7 @@
 git clone https://github.com/dreamlee0/history-rag-chat.git
 cd history-rag-chat
 pip install -r requirements.txt
-cp .env.example .env          # 填入 LLM_API_KEY（智谱 AI 或任意 OpenAI 兼容接口）
+cp .env.example .env          # 填入 LLM_API_KEY（DeepSeek 或任意 OpenAI 兼容接口）
 streamlit run web/app.py
 ```
 
@@ -53,7 +53,7 @@ streamlit run web/app.py
 | 组件 | 说明 |
 |---|---|
 | LangChain + Chroma | RAG 检索增强 |
-| 智谱 GLM-4.5-flash | LLM（OpenAI 兼容） |
+| DeepSeek deepseek-v4-flash | LLM（OpenAI 兼容） |
 | BAAI/bge-small-zh-v1.5 | 本地 Embedding（免费，无需 Key） |
 | SQLite + Streamlit | 持久化 / Web 界面 |
 
@@ -146,9 +146,9 @@ history-rag-chat/
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| LLM_API_KEY | 智谱 AI API Key（或任意 OpenAI 兼容接口 Key） | - |
-| LLM_BASE_URL | LLM 接口地址 | https://open.bigmodel.cn/api/paas/v4 |
-| LLM_MODEL | 大模型名称 | glm-4.5-flash |
+| LLM_API_KEY | DeepSeek API Key（或任意 OpenAI 兼容接口 Key） | - |
+| LLM_BASE_URL | LLM 接口地址 | https://api.deepseek.com |
+| LLM_MODEL | 大模型名称 | deepseek-v4-flash |
 | EMBEDDING_MODEL | Embedding 模型（本地 HuggingFace） | BAAI/bge-small-zh-v1.5 |
 | VECTOR_DB_PATH | 向量数据库路径 | ./data/vector_db |
 | DB_PATH | 对话数据库路径 | ./data/history_chat.db |
