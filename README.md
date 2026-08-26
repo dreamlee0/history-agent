@@ -1,12 +1,12 @@
-# 🏛️ 历史人物对话系统
+# 🏛️ 历史人物对话系统（history-rag-chat）
 
-> 基于 LangChain + RAG 的历史人物对话系统（RAG 对话机器人），可以与中国历史人物进行沉浸式对话。
+[English](README.en.md) | 中文
+
+> 基于 **LangChain + RAG** 的历史人物对话系统：与中国历史人物进行沉浸式、可溯源的多轮对话。
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![LangChain](https://img.shields.io/badge/LangChain-1.2-green.svg)](https://langchain.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
----
 
 ## 📸 项目预览
 
@@ -28,54 +28,34 @@
   <img src="images/chat界面.png" alt="聊天界面" width="800"/>
 </div>
 
----
-
 ## ✨ 功能特点
 
-- 🎭 **角色扮演** - 97位历史人物，覆盖21个朝代（三国拆为蜀汉/东吴/曹魏），真实还原人物性格和说话风格
-- 📚 **RAG知识增强** - 基于真实史料回答问题，支持知识溯源
-- 💬 **多轮对话** - 支持上下文记忆，连贯对话
-- 💾 **对话持久化** - SQLite 存储对话历史，刷新不丢失
-- 📤 **对话导出** - 支持Markdown/PDF格式导出
-- 🌐 **Web界面** - 水墨丹青风格的Streamlit界面
+- 🎭 **角色扮演** · 97 位历史人物，覆盖 21 个朝代（三国拆蜀汉/东吴/曹魏），真实还原人物性格与口吻
+- 📚 **RAG 知识增强** · 基于真实史料回答，知识可溯源、引用可验证
+- 💬 **多轮对话记忆** · SQLite 持久化，刷新不丢失
+- 📤 **对话导出** · Markdown / PDF
+- 📏 **内置评测体系** · 标注评测集 + hit@k / MRR / 阈值标定，防跨人物污染可量化
 
 ## 🚀 快速开始
 
-### 在线体验
-
-访问 Streamlit Cloud 部署的应用即可体验。
-
-### 本地运行
+在线体验：[history-rag-chat.streamlit.app](https://history-rag-chat.streamlit.app/)
 
 ```bash
-# 克隆项目
 git clone https://github.com/dreamlee0/history-rag-chat.git
 cd history-rag-chat
-
-# 安装依赖
 pip install -r requirements.txt
-
-# 配置环境变量
-cp .env.example .env
-# 编辑.env文件，填入智谱AI API Key
-
-# 启动应用
+cp .env.example .env          # 填入 LLM_API_KEY（智谱 AI 或任意 OpenAI 兼容接口）
 streamlit run web/app.py
 ```
 
-本地访问：http://localhost:8501
-在线访问：[history-rag-chat.streamlit.app/](https://history-rag-chat.streamlit.app/)
+## 🧩 技术栈
 
-## 🛠️ 技术栈
-
-| 层级 | 技术 |
-|------|------|
-| **框架** | LangChain |
-| **大语言模型** | 智谱AI GLM-4 |
-| **向量数据库** | Chroma |
-| **对话存储** | SQLite |
-| **Web界面** | Streamlit |
-| **Embedding** | 本地 BAAI/bge-small-zh-v1.5 |
+| 组件 | 说明 |
+|---|---|
+| LangChain + Chroma | RAG 检索增强 |
+| 智谱 GLM-4.5-flash | LLM（OpenAI 兼容） |
+| BAAI/bge-small-zh-v1.5 | 本地 Embedding（免费，无需 Key） |
+| SQLite + Streamlit | 持久化 / Web 界面 |
 
 ## 📁 项目结构
 
@@ -104,11 +84,12 @@ history-rag-chat/
 │   │   ├── qing/            # 清朝
 │   │   ├── wudai/           # 五代十国
 │   │   └── minguo/          # 民国
-│   ├── knowledge/           # 史料知识库
+│   ├── knowledge/           # 史料知识库（99 篇）
+│   ├── eval/                # 标注评测集
 │   └── vector_db/           # Chroma向量数据库
 ├── scripts/                 # 工具脚本
 ├── src/
-│   ├── agents/              # 历史人物对话系统（RAG 对话机器人）
+│   ├── agents/              # 核心 Agent（对话编排 / RAG 检索）
 │   ├── characters/          # 人物管理器
 │   ├── database/            # SQLite数据库
 │   ├── memory/              # 对话记忆
@@ -121,7 +102,7 @@ history-rag-chat/
 └── requirements.txt
 ```
 
-## 📚 历史人物列表（97位）
+## 📚 历史人物列表（97 位）
 
 | 朝代 | 人物 |
 |------|------|
@@ -165,10 +146,10 @@ history-rag-chat/
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| LLM_API_KEY | 智谱AI API Key（或任意 OpenAI 兼容接口 Key） | - |
+| LLM_API_KEY | 智谱 AI API Key（或任意 OpenAI 兼容接口 Key） | - |
 | LLM_BASE_URL | LLM 接口地址 | https://open.bigmodel.cn/api/paas/v4 |
 | LLM_MODEL | 大模型名称 | glm-4.5-flash |
-| EMBEDDING_MODEL | Embedding模型（本地 HuggingFace） | BAAI/bge-small-zh-v1.5 |
+| EMBEDDING_MODEL | Embedding 模型（本地 HuggingFace） | BAAI/bge-small-zh-v1.5 |
 | VECTOR_DB_PATH | 向量数据库路径 | ./data/vector_db |
 | DB_PATH | 对话数据库路径 | ./data/history_chat.db |
 | MAX_HISTORY | 注入 LLM 上下文的历史消息条数 | 10 |
@@ -176,71 +157,30 @@ history-rag-chat/
 | RETRIEVAL_MODE | 检索模式：`similarity` \| `mmr`（最大边际相关重排） | similarity |
 | CONVERSATION_RETENTION_DAYS | 对话保留天数，超过则由 `scripts/cleanup_db.py` 清理；0=不清理 | 0 |
 
-## 📏 评测（方法论：给检索装上"尺子"）
+## 📏 评测（给检索装上"尺子"）
 
-项目自带**标注评测集 + 评测脚本**，把"防污染做得好不好"从"相信"变成"可量化"：
-
-- **标注集**：`data/eval/retrieval_eval.json`（26 条，含三类：`same` 问自己 / `cross`
-  问他人 / `event` 问事件；`cross` 中刻意埋了"当事人自传是陷阱"的用例，如隋文帝问大运河）。
-- **指标**：hit@1 / hit@3 / MRR（期望人物是否进入检索结果及排位）+ 防污染门决策正确率。
-- **阈值扫描**：`--sweep` 在 `filtered_score_ratio ∈ [1.0, 2.0]` 上重放决策，给出最优阈值，
-  `filtered_score_ratio=1.20` 的默认值即由该数据标定（26 条上决策正确率 1.00，1.25 时为 0.962，
-  恰漏"大运河陷阱"一项）。
-- **引用校验（可选，付费）**：`--llm-grounding N` 真实调用 LLM 走完整对话，统计回答引用史料的
-  比例与引用命中期望人物的比例。
+标注集 `data/eval/retrieval_eval.json`（26 条：问自己 / 问他人 / 问事件，含"当事人自传是陷阱"的用例）+ 脚本 `scripts/evaluate_retrieval.py`：
 
 ```bash
-python scripts/evaluate_retrieval.py          # 检索层指标（无需 API Key，本地即可跑）
-python scripts/evaluate_retrieval.py --sweep  # 追加阈值扫描
-python scripts/evaluate_retrieval.py --llm-grounding 5   # 可选：真实 LLM 引用校验（需 Key，付费）
+python scripts/evaluate_retrieval.py          # hit@1/hit@3/MRR + 防污染门决策正确率
+python scripts/evaluate_retrieval.py --sweep  # 阈值扫描（FILTERED_SCORE_RATIO=1.20 即由此标定）
+python scripts/evaluate_retrieval.py --llm-grounding 5   # 可选：真实 LLM 引用校验（付费）
 ```
-
-> 注意：评测集为小规模标定集（26 条、查询刻意无歧义），用于**回归监控**与**阈值标定**，
-> 不是完整的 benchmark。扩展标注集后重跑脚本即可持续观察检索质量。
 
 ## ✅ 引用可验证（grounding 硬化）
 
 有史料命中时，模型被要求输出结构化 JSON `{"reply": ..., "cited_sources": [索引]}`，
-代码侧**校验索引落在本次检索集合内**才渲染为【参考史料】，越界引用一律丢弃；
-解析失败自动回退纯文本，不阻塞对话。因此"引用不存在的文献"不会再进入渲染/落库
+代码侧校验索引落在本次检索集合内才渲染为【参考史料】，越界引用一律丢弃；
+解析失败自动回退纯文本，不阻塞对话。因此"引用不存在的文献"不会进入渲染/落库
 （详见 `src/agents/history_agent.py` 的 `_parse_structured_reply` / `_validate_cited`）。
 
-## ⚠️ 部署说明
+## ⚠️ 部署注意
 
-### 安全警示
-本项目**默认无鉴权**，所有访问者共享同一个 SQLite 对话库（`data/history_chat.db`），
-会话隔离仅靠浏览器会话 ID。**仅适合个人使用或内网演示**；如需公网部署，请自行
-增加鉴权（可在 `web/app.py` 顶部通过 `st.secrets` 配置可选密码），并确认
-`.streamlit/config.toml` 中 `enableXsrfProtection` 保持开启。
-
-### 冷启动与 Embedding 模型缓存（M9）
-每次冷启动会加载本地 Embedding 模型 `BAAI/bge-small-zh-v1.5`，首次运行需从
-HuggingFace 下载并缓存到本地（`~/.cache/huggingface`），之后走本地快照加载。
-云平台（如 Streamlit Cloud）每次冷启动环境可能被重置、无持久磁盘，请优先使用
-提供持久化缓存目录的方案，或接受首次启动较慢。
-
-### 更换 Embedding 模型后需重建向量库（L5）
-`data/vector_db/` 为向量库二进制，随仓库提交以保证云端开箱即用。**更换
-Embedding 模型后必须删除 `data/vector_db` 并运行 `python scripts/build_vector_db.py`
-重建**（该脚本每次运行都会清空并重建，可重复执行，不会重复入库）。
-
-### 对话记忆策略（M2 / H3）
-当前对话记忆为「最近 N 条」策略（默认 10 条，可用环境变量 `MAX_HISTORY` 调整），
-超出的历史消息会从 LLM 上下文中丢弃，不进行摘要压缩。**注意**：内存记忆是进程内
-单例，多进程部署（gunicorn 多 worker / Streamlit 多实例）时各进程内存互不可见，
-上下文恢复以 SQLite 为准：`chat()` 在内存为空、携带 `conversation_id` 续聊时，
-会经 `restore_recent_messages` 从 SQLite 冷启动恢复最近 N 条。
-
-### 对话库清理（无归档策略的补丁）
-`conversations/messages` 表会无限增长。设置 `CONVERSATION_RETENTION_DAYS`（默认 0=不清理）
-后，运行 `python scripts/cleanup_db.py`（可配 `--days N` / `--dry-run`，建议由 cron 定时执行）
-即可按更新时间删除过期对话。
-
-### 检索模式（默认相似度，可选 MMR）
-默认 `RETRIEVAL_MODE=similarity` 保持既有行为；当史料规模扩大（数千篇）后，可切
-`RETRIEVAL_MODE=mmr` 用最大边际相关重排提升召回多样性（防跨人物污染决策仍基于
-相似度分数，不受切换影响）。
+- **默认无鉴权**，仅适合个人 / 内网演示；公网部署请自行加鉴权，并保持 `enableXsrfProtection` 开启。
+- 冷启动需加载本地 Embedding（首次联网下载，之后走本地缓存）。
+- 更换 Embedding 模型后须删除 `data/vector_db` 并运行 `scripts/build_vector_db.py` 重建。
+- 对话库可按保留天数由 `scripts/cleanup_db.py` 清理（建议 cron 定时执行）。
 
 ## 📄 License
 
-MIT License © 2024 Dreamlee0
+MIT © 2024 Dreamlee0
