@@ -89,7 +89,7 @@ history-rag-chat/
 │   └── vector_db/           # Chroma vector DB
 ├── scripts/                 # Utility scripts
 ├── src/
-│   ├── agents/              # Core agent (chat orchestration / RAG)
+│   ├── agents/              # Chat orchestration / RAG
 │   ├── characters/          # Character manager
 │   ├── database/            # SQLite database
 │   ├── memory/              # Conversation memory

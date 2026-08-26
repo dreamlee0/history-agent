@@ -13,10 +13,10 @@ class Settings(BaseSettings):
     # LLM (OpenAI兼容接口，可接智谱/DeepSeek/OpenAI等)
     llm_api_key: str = Field(default="", env="LLM_API_KEY")
     llm_base_url: str = Field(
-        default="https://open.bigmodel.cn/api/paas/v4",
+        default="https://api.deepseek.com",
         env="LLM_BASE_URL",
     )
-    llm_model: str = Field(default="glm-4.5-flash", env="LLM_MODEL")
+    llm_model: str = Field(default="deepseek-v4-flash", env="LLM_MODEL")
 
     # Embedding配置 (本地 HuggingFace 模型，免费无需 API Key)
     embedding_model: str = Field(

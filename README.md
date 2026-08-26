@@ -89,7 +89,7 @@ history-rag-chat/
 │   └── vector_db/           # Chroma向量数据库
 ├── scripts/                 # 工具脚本
 ├── src/
-│   ├── agents/              # 核心 Agent（对话编排 / RAG 检索）
+│   ├── agents/              # 对话编排 / RAG 检索
 │   ├── characters/          # 人物管理器
 │   ├── database/            # SQLite数据库
 │   ├── memory/              # 对话记忆
