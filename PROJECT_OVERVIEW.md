@@ -62,7 +62,7 @@
 
 ### 3.1 产品级亮点
 - **历史还原与防幻觉并重**：不只"像"，更求"准"——史料明确记载的照实回答，未记载的如实说明"史料记载有限"，绝不编造年份、数字或文献出处；
-- **零 API 幻觉成本**：LLM 使用免费额度的 `glm-4.5-flash`，Embedding 使用**本地 HuggingFace 模型**（`BAAI/bge-small-zh-v1.5`），无需额外 API Key；
+- **零 API 幻觉成本**：LLM 使用低成本的 `deepseek-v4-flash`，Embedding 使用**本地 HuggingFace 模型**（`BAAI/bge-small-zh-v1.5`），无需额外 API Key；
 - **跨人物问答不串味**：向李白问杜甫，系统能识别"与本人物无关"并退回全局检索，不会把李白自己的传记误当"杜甫史料"注入（实测同人距离比 ~1.0、跨人 ~1.83）；
 - **开箱即用的知识库**：向量库已构建并随仓库提交，首次启动无需联网下载模型即可使用（本地缓存模型时）。
 
@@ -110,7 +110,7 @@
 | 层级 | 技术选型 | 说明 |
 |------|----------|------|
 | Agent 框架 | LangChain (`1.2.x`) | 文档处理、向量存储、消息封装 |
-| 大语言模型 | 智谱 AI `glm-4.5-flash`（OpenAI 兼容） | 免费方案，可换 DeepSeek/OpenAI 等 |
+| 大语言模型 | DeepSeek `deepseek-v4-flash`（OpenAI 兼容） | 低成本方案，可换智谱/OpenAI 等 |
 | Embedding | 本地 `BAAI/bge-small-zh-v1.5` (HuggingFace) | 本地运行，免费、无需 API Key |
 | 向量数据库 | Chroma (`1.5.8`) | `data/vector_db`，含人物/分类元数据过滤 |
 | 对话存储 | SQLite (WAL) | 轻量实现，无 ORM 依赖 |
@@ -155,7 +155,7 @@
 无 RAG 命中时进入专门分支："基于可靠常识 + 切勿编造出处/数字"。对应测试见 `tests/test_agent_prompt.py`。
 
 #### ⑤ 低成本部署方案
-LLM 用 `glm-4.5-flash`（免费/低费）+ Embedding 本地化（零 API 成本）+ 向量库随仓库提交（免首次构建），实现"近乎零成本运行 + 云端可部署"。
+LLM 用 `deepseek-v4-flash`（低成本）+ Embedding 本地化（零 API 成本）+ 向量库随仓库提交（免首次构建），实现"近乎零成本运行 + 云端可部署"。
 
 #### ⑥ 版本钉死与兼容性
 `requirements.txt` 明确标注各关键包必须版本（尤其 `chromadb==1.5.8` 不可降到 0.x，与已提交向量库格式匹配），并说明与构建环境一致，避免线上/线下格式不兼容。
@@ -231,7 +231,7 @@ pip install -r requirements.txt
 
 # 2. 配置环境变量
 cp .env.example .env
-# 编辑 .env，填入 LLM_API_KEY（智谱 AI 或任意 OpenAI 兼容 Key）
+# 编辑 .env，填入 LLM_API_KEY（DeepSeek 或任意 OpenAI 兼容 Key）
 
 # 3. 启动应用
 streamlit run web/app.py
@@ -250,8 +250,8 @@ streamlit run web/app.py
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
 | `LLM_API_KEY` | LLM API Key | - |
-| `LLM_BASE_URL` | LLM 接口地址 | `https://open.bigmodel.cn/api/paas/v4` |
-| `LLM_MODEL` | 大模型名称 | `glm-4.5-flash` |
+| `LLM_BASE_URL` | LLM 接口地址 | `https://api.deepseek.com` |
+| `LLM_MODEL` | 大模型名称 | `deepseek-v4-flash` |
 | `EMBEDDING_MODEL` | 本地 Embedding 模型 | `BAAI/bge-small-zh-v1.5` |
 | `VECTOR_DB_PATH` | 向量库路径 | `./data/vector_db` |
 | `DB_PATH` | 对话库路径 | `./data/history_chat.db` |

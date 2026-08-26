@@ -496,7 +496,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
         <div class="card-h"><span class="ico">🏮</span><h3>产品级亮点</h3></div>
         <ul style="padding-left:1.1em;color:var(--ink-soft);font-size:.95rem">
           <li style="margin-top:8px"><b style="color:var(--vermilion)">历史还原与防幻觉并重</b>——史料明确记载的照实回答，未记载的如实说明，绝不编造年份、数字或文献出处；</li>
-          <li style="margin-top:8px"><b style="color:var(--vermilion)">近零成本</b>——LLM 用免费额度 <code>glm-4.5-flash</code>，Embedding 用本地 HuggingFace 模型，无需额外 API Key；</li>
+          <li style="margin-top:8px"><b style="color:var(--vermilion)">近零成本</b>——LLM 用低成本 <code>deepseek-v4-flash</code>，Embedding 用本地 HuggingFace 模型，无需额外 API Key；</li>
           <li style="margin-top:8px"><b style="color:var(--vermilion)">跨人物问答不串味</b>——向李白问杜甫，自动识别"与本人物无关"并退回全局检索，不把当事人传记误当史料注入；</li>
           <li style="margin-top:8px"><b style="color:var(--vermilion)">开箱即用</b>——向量库随仓库提交，本地缓存模型时首次启动无需联网。</li>
         </ul>
@@ -571,7 +571,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
         <thead><tr><th>层级</th><th>技术选型</th><th>说明</th></tr></thead>
         <tbody>
           <tr><td>Agent 框架</td><td>LangChain (1.2.x)</td><td>文档处理、向量存储、消息封装</td></tr>
-          <tr><td>大语言模型</td><td>智谱 AI glm-4.5-flash（OpenAI 兼容）</td><td>免费方案，可换 DeepSeek / OpenAI 等</td></tr>
+          <tr><td>大语言模型</td><td>DeepSeek deepseek-v4-flash（OpenAI 兼容）</td><td>低成本方案，可换智谱 / OpenAI 等</td></tr>
           <tr><td>Embedding</td><td>本地 BAAI/bge-small-zh-v1.5</td><td>本地运行，免费、无需 API Key</td></tr>
           <tr><td>向量数据库</td><td>Chroma (1.5.8)</td><td>含人物 / 分类元数据过滤</td></tr>
           <tr><td>对话存储</td><td>SQLite (WAL)</td><td>轻量实现，无 ORM 依赖</td></tr>
@@ -646,7 +646,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       <div class="kt reveal">
         <div class="n">五</div>
         <div><h3>低成本部署方案</h3>
-          <div class="kd">LLM 用 <code>glm-4.5-flash</code>（免费 / 低费）+ Embedding 本地化（零 API 成本）+ 向量库随仓库提交（免首次构建），实现"近乎零成本运行 + 云端可部署"。</div></div>
+          <div class="kd">LLM 用 <code>deepseek-v4-flash</code>（低成本）+ Embedding 本地化（零 API 成本）+ 向量库随仓库提交（免首次构建），实现"近乎零成本运行 + 云端可部署"。</div></div>
       </div>
       <div class="kt reveal">
         <div class="n">六</div>
@@ -761,7 +761,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
 
 <span class="cm"># 2. 配置环境变量</span>
 <span class="k">cp</span> .env.example .env
-<span class="cm"># 编辑 .env，填入 LLM_API_KEY（智谱 AI 或任意 OpenAI 兼容 Key）</span>
+<span class="cm"># 编辑 .env，填入 LLM_API_KEY（DeepSeek 或任意 OpenAI 兼容 Key）</span>
 
 <span class="cm"># 3. 启动应用</span>
 <span class="k">streamlit run</span> web/app.py
@@ -778,8 +778,8 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
         <thead><tr><th>变量</th><th>说明</th><th>默认值</th></tr></thead>
         <tbody>
           <tr><td><code>LLM_API_KEY</code></td><td>LLM API Key</td><td>—</td></tr>
-          <tr><td><code>LLM_BASE_URL</code></td><td>LLM 接口地址</td><td>https://open.bigmodel.cn/api/paas/v4</td></tr>
-          <tr><td><code>LLM_MODEL</code></td><td>大模型名称</td><td>glm-4.5-flash</td></tr>
+          <tr><td><code>LLM_BASE_URL</code></td><td>LLM 接口地址</td><td>https://api.deepseek.com</td></tr>
+          <tr><td><code>LLM_MODEL</code></td><td>大模型名称</td><td>deepseek-v4-flash</td></tr>
           <tr><td><code>EMBEDDING_MODEL</code></td><td>本地 Embedding 模型</td><td>BAAI/bge-small-zh-v1.5</td></tr>
           <tr><td><code>VECTOR_DB_PATH</code></td><td>向量库路径</td><td>./data/vector_db</td></tr>
           <tr><td><code>DB_PATH</code></td><td>对话库路径</td><td>./data/history_chat.db</td></tr>

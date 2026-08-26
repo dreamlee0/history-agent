@@ -1,5 +1,5 @@
 """
-配置管理 - 支持智谱AI
+配置管理 - 支持 DeepSeek/智谱等 OpenAI 兼容接口
 """
 from pydantic_settings import BaseSettings
 from pydantic import Field
