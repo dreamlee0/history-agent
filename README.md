@@ -157,7 +157,7 @@ history-rag-chat/
 | RETRIEVAL_MODE | 检索模式：`similarity` \| `mmr`（最大边际相关重排） | similarity |
 | CONVERSATION_RETENTION_DAYS | 对话保留天数，超过则由 `scripts/cleanup_db.py` 清理；0=不清理 | 0 |
 
-## 📏 评测（给检索装上"尺子"）
+## 📏 评测
 
 标注集 `data/eval/retrieval_eval.json`（26 条：问自己 / 问他人 / 问事件，含"当事人自传是陷阱"的用例）+ 脚本 `scripts/evaluate_retrieval.py`：
 
@@ -167,7 +167,7 @@ python scripts/evaluate_retrieval.py --sweep  # 阈值扫描（FILTERED_SCORE_RA
 python scripts/evaluate_retrieval.py --llm-grounding 5   # 可选：真实 LLM 引用校验（付费）
 ```
 
-## ✅ 引用可验证（grounding 硬化）
+## ✅ 引用可验证
 
 有史料命中时，模型被要求输出结构化 JSON `{"reply": ..., "cited_sources": [索引]}`，
 代码侧校验索引落在本次检索集合内才渲染为【参考史料】，越界引用一律丢弃；
