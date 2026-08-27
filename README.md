@@ -13,7 +13,7 @@
 ### 🎭 人物选择界面
 
 <div align="center">
-  <img src="images/人物选择.png" alt="人物选择界面" width="800"/>
+  <img src="images/chat界面.png" alt="人物选择界面" width="800"/>
 </div>
 
 ### 💬 对话展示界面
@@ -25,7 +25,7 @@
 ### 🖥️ 聊天界面
 
 <div align="center">
-  <img src="images/chat界面.png" alt="聊天界面" width="800"/>
+  <img src="images/人物选择.png" alt="聊天界面" width="800"/>
 </div>
 
 ## ✨ 功能特点
