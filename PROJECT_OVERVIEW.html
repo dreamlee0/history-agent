@@ -396,15 +396,15 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       <p class="hero-sub">基于 <b style="color:var(--vermilion)">LangChain + RAG</b> 的沉浸式历史人物对话系统 —— 与 97 位中国历史人物跨千年对话，让每一句回答都有史可依、有源可溯。</p>
       <div class="hero-tags">
         <span class="hero-tag">🎭 角色扮演 · <b>97</b> 位人物</span>
-        <span class="hero-tag">📚 RAG 知识增强 · <b>99</b> 篇史料</span>
+        <span class="hero-tag">📚 RAG 知识增强 · <b>206</b> 篇双轨史料</span>
         <span class="hero-tag">🛡️ 防幻觉 · <b>可溯源</b></span>
         <span class="hero-tag">🖋️ 水墨丹青 · Web 界面</span>
       </div>
       <div class="stats">
         <div class="stat reveal d1"><div class="num" data-count="97">0</div><div class="lbl">历史人物</div></div>
-        <div class="stat reveal d2"><div class="num" data-count="20">0</div><div class="lbl">覆盖朝代</div></div>
-        <div class="stat reveal d3"><div class="num" data-count="99">0</div><div class="lbl">史料文档</div></div>
-        <div class="stat reveal d4"><div class="num" data-count="22">0</div><div class="lbl">测试用例</div></div>
+        <div class="stat reveal d2"><div class="num" data-count="21">0</div><div class="lbl">覆盖朝代</div></div>
+        <div class="stat reveal d3"><div class="num" data-count="206">0</div><div class="lbl">史料文档</div></div>
+        <div class="stat reveal d4"><div class="num" data-count="110">0</div><div class="lbl">测试用例</div></div>
       </div>
     </div>
   </div>
@@ -448,11 +448,11 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
     <div class="features">
       <div class="card feature rise reveal d1">
         <div class="card-h"><span class="idx">一</span><h3>🎭 角色扮演</h3></div>
-        <p>97 位历史人物，覆盖 20 个朝代。每位人物由独立 YAML 档案定义身份、性格、说话风格与名言，系统提示词据此生成，口吻与时代感真实还原。</p>
+        <p>97 位历史人物，覆盖 21 个朝代。每位人物由独立 YAML 档案定义身份、性格、说话风格与名言，系统提示词据此生成，口吻与时代感真实还原。</p>
       </div>
       <div class="card feature rise reveal d2">
         <div class="card-h"><span class="idx">二</span><h3>📚 RAG 知识增强与溯源</h3></div>
-        <p>内置 99 篇史料文档（97 篇人物传记 + 2 篇事件史料），检索增强生成，回答末尾自动标注【参考史料】，支持知识溯源。</p>
+        <p>内置<b>双轨史料库（206 篇 = 99 persona + 107 真实史源）</b>，97/97 人物均有真实史料（古诗文网 / 百度百科 / ctext），检索增强生成，回答末尾自动标注【参考史料】，支持知识溯源。</p>
       </div>
       <div class="card feature rise reveal d3">
         <div class="card-h"><span class="idx">三</span><h3>💬 多轮对话与记忆</h3></div>
@@ -476,7 +476,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       </div>
       <div class="card feature rise reveal d2">
         <div class="card-h"><span class="idx">八</span><h3>🧪 工程化与测试</h3></div>
-        <p>22 个 pytest 用例（人物加载、知识库完整性、RAG 防污染、防幻觉提示词、记忆隔离等），Dev Container + Streamlit Cloud 部署支持。</p>
+        <p>110 个 pytest 用例（人物加载、知识库完整性、RAG 防污染、多人物联合检索、BM25、多格式解析、端到端等），Dev Container + Streamlit Cloud 部署支持。</p>
       </div>
     </div>
   </div>
@@ -497,7 +497,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
         <ul style="padding-left:1.1em;color:var(--ink-soft);font-size:.95rem">
           <li style="margin-top:8px"><b style="color:var(--vermilion)">历史还原与防幻觉并重</b>——史料明确记载的照实回答，未记载的如实说明，绝不编造年份、数字或文献出处；</li>
           <li style="margin-top:8px"><b style="color:var(--vermilion)">近零成本</b>——LLM 用低成本 <code>deepseek-v4-flash</code>，Embedding 用本地 HuggingFace 模型，无需额外 API Key；</li>
-          <li style="margin-top:8px"><b style="color:var(--vermilion)">跨人物问答不串味</b>——向李白问杜甫，自动识别"与本人物无关"并退回全局检索，不把当事人传记误当史料注入；</li>
+          <li style="margin-top:8px"><b style="color:var(--vermilion)">跨人物问答不串味 + 多人枚举联合召回</b>——向李白问杜甫自动退回全局检索；问"李白和杜甫谁更豪放"这类点名多人的题走联合检索（<code>$in</code> 联合池），不把当事人传记误当史料注入；</li>
           <li style="margin-top:8px"><b style="color:var(--vermilion)">开箱即用</b>——向量库随仓库提交，本地缓存模型时首次启动无需联网。</li>
         </ul>
       </div>
@@ -538,7 +538,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
         <div class="lbl">◆ 核心编排 · HISTORYCHARACTERAGENT</div>
         <div class="row">
           <div class="box"><div class="t">🎭 人物系统提示词</div><div class="d">YAML 档案 → 角色设定</div></div>
-          <div class="box"><div class="t">🔎 RAG 检索</div><div class="d">人物过滤 + 全局兜底</div></div>
+          <div class="box"><div class="t">🔎 RAG 检索</div><div class="d">人物过滤 + 全局兜底 + 多人联合</div></div>
           <div class="box"><div class="t">🛡️ 防幻觉提示词</div><div class="d">4 条硬性规则</div></div>
           <div class="box"><div class="t">🔁 API 重试</div><div class="d">指数退避 · 错误分类</div></div>
         </div>
@@ -557,11 +557,11 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       <div class="layer">
         <div class="lbl">◆ 数据层与工具链</div>
         <div class="row">
-          <div class="box"><div class="t">📜 史料知识库</div><div class="d">99 篇 · 带元数据</div></div>
+          <div class="box"><div class="t">📜 史料知识库</div><div class="d">206 篇 · 双轨带元数据</div></div>
           <div class="box"><div class="t">👥 人物档案</div><div class="d">97 位 · 按朝代分目录</div></div>
           <div class="box"><div class="t">🧱 向量库</div><div class="d">data/vector_db</div></div>
           <div class="box"><div class="t">🧰 脚本</div><div class="d">爬虫 / 构建 / 生成</div></div>
-          <div class="box"><div class="t">🧪 测试</div><div class="d">22 用例 · 5 模块</div></div>
+          <div class="box"><div class="t">🧪 测试</div><div class="d">110 用例</div></div>
         </div>
       </div>
     </div>
@@ -597,7 +597,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       <div class="fstep reveal"><div class="dot">1</div><div class="fc"><div class="ft">选择人物</div><div class="fd">加载 YAML 档案，生成人物系统提示词（身份、性格、说话风格、知识领域、名言）。</div></div></div>
       <div class="fstep reveal"><div class="dot">2</div><div class="fc"><div class="ft">用户输入</div><div class="fd">新对话则创建 conversation 记录。</div></div></div>
       <div class="fstep reveal"><div class="dot">3</div><div class="fc"><div class="ft">记忆恢复</div><div class="fd">按 <code>会话:人物</code> 复合键读取内存记忆，为空则从 SQLite 恢复最近 10 轮。</div></div></div>
-      <div class="fstep reveal"><div class="dot">4</div><div class="fc"><div class="ft">RAG 检索</div><div class="fd">① 按人物过滤检索 → ② 全局检索 → ③ 过滤结果劣于全局最优 1.25 倍则退回全局 → ④ 拼装上下文与溯源列表。</div></div></div>
+      <div class="fstep reveal"><div class="dot">4</div><div class="fc"><div class="ft">RAG 检索</div><div class="fd">① 多人物联合检索（点名 ≥2 人走 <code>$in</code> 联合池）→ ② 人物过滤 / 全局检索 + 决策门 → ③ 库外或无相关走 no-RAG 分支 → ④ 拼装上下文与溯源列表。</div></div></div>
       <div class="fstep reveal"><div class="dot">5</div><div class="fc"><div class="ft">组装消息</div><div class="fd">System Prompt（人物设定 + 史料 + 4 条防幻觉规则）+ 历史消息 + 当前问题。</div></div></div>
       <div class="fstep reveal"><div class="dot">6</div><div class="fc"><div class="ft">调用 LLM</div><div class="fd">超时控制 + 指数退避重试，区分错误类型友好提示。</div></div></div>
       <div class="fstep reveal"><div class="dot">7</div><div class="fc"><div class="ft">持久化</div><div class="fd">助手消息连同引用来源 JSON 写入 SQLite，并更新内存记忆。</div></div></div>
@@ -672,28 +672,36 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
 │   └── settings.py
 ├── <span class="dir">data/</span>            <span class="cm"># 数据层</span>
 │   ├── <span class="dir">characters/</span>    <span class="cm"># 97 位历史人物配置（按朝代分目录，YAML）</span>
-│   ├── <span class="dir">knowledge/</span>     <span class="cm"># 史料知识库（99 篇：97 传记 + 2 事件）</span>
-│   │   ├── biography_*.txt  <span class="cm"># 人物传记（头部含 来源 / 分类 / 人物 元数据）</span>
-│   │   ├── event_*.txt      <span class="cm"># 事件史料</span>
-│   │   └── crawl_cache.json <span class="cm"># 爬虫缓存</span>
-│   ├── <span class="dir">vector_db/</span>     <span class="cm"># Chroma 向量数据库（已构建并提交）</span>
+│   ├── <span class="dir">knowledge/</span>     <span class="cm"># 双轨史料知识库（99 persona + 107 真实史源）</span>
+│   │   ├── biography_*_内置.txt <span class="cm"># persona 内置摘要（非权威，仅风格参考）</span>
+│   │   ├── biography_*_gushiwen_*.txt <span class="cm"># 古诗文网古籍原文（historical，主源）</span>
+│   │   ├── biography_*_百度百科.txt <span class="cm"># 百度百科（historical，三手资料如实标注）</span>
+│   │   ├── biography_*_ctext_*.txt <span class="cm"># ctext 手写节选样例</span>
+│   │   └── event_*.txt      <span class="cm"># 事件史料</span>
+│   ├── <span class="dir">sources/</span>       <span class="cm"># 数据源映射 / 抓取计划（character_sources.json 等）</span>
+│   ├── <span class="dir">eval/</span>          <span class="cm"># 标注评测集（198 条，train/holdout 分层）</span>
+│   ├── <span class="dir">vector_db/</span>     <span class="cm"># Chroma 向量数据库（1357 分块，已构建并提交）</span>
 │   └── history_chat.db      <span class="cm"># SQLite 对话库（运行生成）</span>
 ├── <span class="dir">scripts/</span>         <span class="cm"># 工具脚本</span>
 │   ├── build_vector_db.py   <span class="cm"># 构建向量库</span>
-│   ├── crawl_knowledge.py   <span class="cm"># 史料爬虫（带请求头 / 重试 / 缓存）</span>
+│   ├── crawl_knowledge.py   <span class="cm"># 史料爬虫（gushiwen / 百度百科，带请求头 / 重试 / 缓存）</span>
 │   ├── crawl_history.py     <span class="cm"># 历史资料爬虫</span>
-│   └── generate_knowledge.py<span class="cm"># 知识生成</span>
+│   ├── generate_knowledge.py<span class="cm"># 知识生成</span>
+│   ├── evaluate_retrieval_full.py <span class="cm"># 198 条检索评测（--split train/holdout）</span>
+│   ├── evaluate_generation.py <span class="cm"># 在线生成评测（Faithfulness / Relevancy / Citation）</span>
+│   └── evaluate_end_to_end.py <span class="cm"># 端到端评测（Mock / --llm live）</span>
 ├── <span class="dir">src/</span>             <span class="cm"># 核心源码（五层模块）</span>
 │   ├── <span class="dir">agents/</span>         <span class="cm"># 核心 Agent（RAG 检索 + 提示词 + 对话编排）</span>
 │   ├── <span class="dir">characters/</span>     <span class="cm"># 人物加载 / 朝代分组 / 系统提示词生成</span>
 │   ├── <span class="dir">database/</span>       <span class="cm"># SQLite CRUD（会话 / 消息 / 统计 / 搜索）</span>
+│   ├── <span class="dir">knowledge/</span>      <span class="cm"># 人物别名补全 / 多人识别</span>
 │   ├── <span class="dir">memory/</span>         <span class="cm"># 内存记忆（deque + 复合键）</span>
-│   └── <span class="dir">retrievers/</span>     <span class="cm"># Chroma 管理 + Embedding 离线加载 + 文档加载</span>
+│   └── <span class="dir">retrievers/</span>     <span class="cm"># 向量检索 / BM25 词法 / 重排 / 多格式文档加载</span>
 ├── <span class="dir">web/</span>             <span class="cm"># Streamlit 界面</span>
 │   ├── app.py              <span class="cm"># 主应用（Secrets 桥接 / 界面 / 会话）</span>
 │   ├── styles.py           <span class="cm"># 水墨丹青 CSS</span>
 │   └── export_utils.py     <span class="cm"># Markdown / PDF 导出</span>
-├── <span class="dir">tests/</span>           <span class="cm"># 22 个 pytest 用例（5 个测试模块）</span>
+├── <span class="dir">tests/</span>           <span class="cm"># 110 个 pytest 用例（检索 / 防污染 / BM25 / 多格式 / 爬虫 / 端到端等）</span>
 ├── <span class="dir">images/</span>          <span class="cm"># 项目截图</span>
 ├── .devcontainer/          <span class="cm"># Dev Container 开发环境</span>
 ├── .streamlit/config.toml  <span class="cm"># Streamlit 服务器配置</span>
@@ -712,15 +720,15 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       <span class="seal-num">捌</span>
       <div class="eyebrow">DATA</div>
       <h2 class="section-title">数据<span class="cn">说明</span></h2>
-      <p class="section-sub">97 位人物、99 篇史料、1.7MB 向量库，随仓库即开即用</p>
+      <p class="section-sub">97 位人物、206 篇双轨史料、1357 个向量分块，随仓库即开即用</p>
     </div>
     <div class="table-wrap reveal">
       <table>
         <thead><tr><th>数据</th><th>数量</th><th>说明</th></tr></thead>
         <tbody>
-          <tr><td>历史人物</td><td><b>97 位</b></td><td>覆盖 20 个朝代，每人一个 YAML 档案</td></tr>
-          <tr><td>史料文档</td><td><b>99 篇</b></td><td>97 篇人物传记 + 2 篇事件史料（官渡、赤壁）</td></tr>
-          <tr><td>向量库块数</td><td>按分割自动生成</td><td>500 字 / 块、100 字重叠，中文标点分隔</td></tr>
+          <tr><td>历史人物</td><td><b>97 位</b></td><td>覆盖 21 个朝代，每人一个 YAML 档案</td></tr>
+          <tr><td>史料文档</td><td><b>206 篇</b></td><td>99 篇 persona 内置摘要 + 107 篇真实史源（81 gushiwen + 21 百度百科 + 5 ctext），97/97 人全覆盖</td></tr>
+          <tr><td>向量库块数</td><td><b>1357 块</b></td><td>persona 99 + historical 1258（gushiwen 965 + 百度百科 288 + ctext 5），500 字/块、100 字重叠</td></tr>
           <tr><td>数据库表</td><td>2 张</td><td>conversations（会话）+ messages（消息，含 sources_json 溯源）</td></tr>
         </tbody>
       </table>
@@ -733,8 +741,9 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
 <span class="g">【URL】</span>链接
 <span class="g">【分类】</span>biography / event
 <span class="g">【人物】</span>对应人物
+<span class="g">【朝代】</span>朝代 <span class="g">【出处】</span>书名 <span class="g">【篇卷】</span>章节
 ---
-正文内容
+正文内容（doc_type 自动判定：*_内置 → persona，其余 → historical）
       </div>
     </div>
   </div>
@@ -780,7 +789,12 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
           <tr><td><code>LLM_API_KEY</code></td><td>LLM API Key</td><td>—</td></tr>
           <tr><td><code>LLM_BASE_URL</code></td><td>LLM 接口地址</td><td>https://api.deepseek.com</td></tr>
           <tr><td><code>LLM_MODEL</code></td><td>大模型名称</td><td>deepseek-v4-flash</td></tr>
+          <tr><td><code>LLM_MAX_TOKENS</code></td><td>生成最大 token（reasoning 模型截断防护，实测 1024 稳定）</td><td>1024</td></tr>
           <tr><td><code>EMBEDDING_MODEL</code></td><td>本地 Embedding 模型</td><td>BAAI/bge-small-zh-v1.5</td></tr>
+          <tr><td><code>FILTERED_SCORE_RATIO</code></td><td>防跨人物污染阈值（train 标定、holdout 验证）</td><td>1.25</td></tr>
+          <tr><td><code>RAG_TOP_K</code></td><td>返回 LLM 的史料条数</td><td>3</td></tr>
+          <tr><td><code>MULTI_TOP_K</code></td><td>多人物联合检索返回条数</td><td>7</td></tr>
+          <tr><td><code>PERSONA_FALLBACK</code></td><td>双轨开关（false 时 persona 完全移出史实检索）</td><td>true</td></tr>
           <tr><td><code>VECTOR_DB_PATH</code></td><td>向量库路径</td><td>./data/vector_db</td></tr>
           <tr><td><code>DB_PATH</code></td><td>对话库路径</td><td>./data/history_chat.db</td></tr>
           <tr><td><code>APP_TITLE</code></td><td>应用标题</td><td>历史人物对话</td></tr>
@@ -797,28 +811,60 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       <span class="seal-num">拾</span>
       <div class="eyebrow">TESTING</div>
       <h2 class="section-title">测试<span class="cn">体系</span></h2>
-      <p class="section-sub">22 个用例覆盖 5 大维度，检索防污染与防幻觉是核心护城河</p>
+      <p class="section-sub">110 个用例覆盖 13 个测试模块，检索防污染与防幻觉是核心护城河</p>
     </div>
     <div class="test-grid">
       <div class="test-card reveal d1">
+        <div class="tc-head"><h3>test_document_loader.py</h3><span class="cnt">19</span></div>
+        <p>10 种格式统一解析（txt/md/html/pdf/docx/xml/json/csv/tsv/xlsx）、doc_type persona/historical 判定、朝代/出处回填。</p>
+      </div>
+      <div class="test-card reveal d2">
+        <div class="tc-head"><h3>test_retrieval.py</h3><span class="cnt">15</span></div>
+        <p>同人检索保持聚焦、跨人检索退回全局、多人物联合检索、<b>不注入当事人传记</b>。</p>
+      </div>
+      <div class="test-card reveal d3">
+        <div class="tc-head"><h3>test_crawler.py</h3><span class="cnt">13</span></div>
+        <p>gushiwen / 百度百科抓取 mock、URL 解析表、去重缓存。</p>
+      </div>
+      <div class="test-card reveal d1">
+        <div class="tc-head"><h3>test_aliases_multi.py</h3><span class="cnt">11</span></div>
+        <p>别名补全、多人枚举识别、多人物联合检索触发。</p>
+      </div>
+      <div class="test-card reveal d2">
+        <div class="tc-head"><h3>test_citation.py</h3><span class="cnt">10</span></div>
+        <p>结构化回答解析、引用索引校验、越界引用丢弃。</p>
+      </div>
+      <div class="test-card reveal d3">
+        <div class="tc-head"><h3>test_bm25.py</h3><span class="cnt">8</span></div>
+        <p>BM25 词法检索、多人物掩码。</p>
+      </div>
+      <div class="test-card reveal d1">
+        <div class="tc-head"><h3>test_character_sources.py</h3><span class="cnt">7</span></div>
+        <p>97 人→数据源映射表完整性。</p>
+      </div>
+      <div class="test-card reveal d2">
+        <div class="tc-head"><h3>test_knowledge.py</h3><span class="cnt">6</span></div>
+        <p>知识文件加载、元数据完整性、97/97 史源覆盖、史实抽查（隋文帝无大运河、隋炀帝有大运河）。</p>
+      </div>
+      <div class="test-card reveal d3">
         <div class="tc-head"><h3>test_characters.py</h3><span class="cnt">5</span></div>
         <p>人物加载、必填字段、朝代顺序、人物与知识文件一一对应、重名检查。</p>
       </div>
-      <div class="test-card reveal d2">
-        <div class="tc-head"><h3>test_knowledge.py</h3><span class="cnt">5</span></div>
-        <p>知识文件加载、元数据完整性、史实正确性抽查（如隋文帝无大运河、隋炀帝有大运河）。</p>
-      </div>
-      <div class="test-card reveal d3">
-        <div class="tc-head"><h3>test_retrieval.py</h3><span class="cnt">5</span></div>
-        <p>同人检索保持聚焦、跨人检索退回全局、<b>不注入当事人传记</b>、人物自有知识可检索。</p>
-      </div>
       <div class="test-card reveal d1">
-        <div class="tc-head"><h3>test_memory.py</h3><span class="cnt">3</span></div>
+        <div class="tc-head"><h3>test_memory.py</h3><span class="cnt">4</span></div>
         <p>复合键含人物、同人物跨会话隔离、复合键清空。</p>
       </div>
       <div class="test-card reveal d2">
+        <div class="tc-head"><h3>test_e2e.py</h3><span class="cnt">4</span></div>
+        <p>Mock LLM 端到端链路、库外拒绝、引用 grounding。</p>
+      </div>
+      <div class="test-card reveal d3">
+        <div class="tc-head"><h3>test_db.py</h3><span class="cnt">4</span></div>
+        <p>对话 CRUD、消息与溯源 JSON 持久化。</p>
+      </div>
+      <div class="test-card reveal d1">
         <div class="tc-head"><h3>test_agent_prompt.py</h3><span class="cnt">4</span></div>
-        <p>防幻觉规则存在、引用限于检索来源、无 RAG 分支禁止编造、角色与事实平衡。</p>
+        <p>防幻觉规则、引用限于检索来源、无 RAG 分支禁止编造、角色与事实平衡。</p>
       </div>
     </div>
     <div class="codeblock reveal" style="margin-top:28px">
@@ -829,6 +875,9 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
         <span class="fname">bash · 运行测试</span>
       </div>
 <pre><span class="k">pytest</span> tests/ -v</pre>
+    </div>
+    <div class="note info reveal" style="margin-top:16px">
+      <b>当前实测（2026-09-02）：</b>多相关枚举 Recall@7 <b>0.745</b>（train 0.732 / holdout 0.803，改进前 @3 = 0.307）；库外拒绝 <b>22/22</b>、自传注入 0/22；单相关 hit@1 0.897 / MRR 0.933 / 决策正确率 0.986；单元测试 <b>110/110</b>。在线生成（真实 DeepSeek-v4-flash）：Faithfulness <b>0.227</b> / Answer Relevancy <b>0.570</b> / Citation Accuracy <b>0.740</b> / 引用覆盖率 0.773。完整数据见 <code>RAG_EVALUATION_REPORT_FULL.md</code> §14。
     </div>
     <div class="note warn reveal">
       <b>注意：</b>无本地 Embedding 缓存的机器会自动跳过需要 embedding 的检索类测试（见 <code>tests/conftest.py</code>）。
@@ -849,9 +898,9 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       <div class="card rise reveal d1">
         <div class="card-h"><span class="ico">🧱</span><h3>当前局限</h3></div>
         <ul style="padding-left:1.1em;color:var(--ink-soft);font-size:.95rem">
-          <li style="margin-top:8px">知识库为内置百科式传记，深度有限（每篇约 1~2 千字），冷门细节覆盖不足；</li>
-          <li style="margin-top:8px">人物与知识文档由脚本 / 内置数据生成，尚未覆盖全部正史细节；</li>
-          <li style="margin-top:8px">LLM 依赖外部 API（需联网），本地仅 Embedding 离线。</li>
+          <li style="margin-top:8px">97/97 人物均有真实史源，但以列传 / 章节节选为主，单篇深度有限，冷门细节覆盖仍不足；</li>
+          <li style="margin-top:8px">21 篇百度百科为三手资料（非正史原文），权威性低于古籍原文，如实标注、仅作引用溯源；</li>
+          <li style="margin-top:8px">LLM 依赖外部 API（需联网），本地仅 Embedding 离线；在线生成指标为真实 DeepSeek 实测，Faithfulness 0.227 仍有提升空间。</li>
         </ul>
       </div>
       <div class="card rise reveal d2">
@@ -880,7 +929,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
   <div class="seal">史</div>
   <div class="fline">穿越五千年 · 与先贤对话</div>
   <p style="margin-top:10px">历史人物对话 Agent · 基于 LangChain + RAG</p>
-  <p style="margin-top:6px">MIT License © 2024 Dreamlee0 · 文档整理于 2026-08</p>
+  <p style="margin-top:6px">MIT License © 2024 Dreamlee0 · 文档整理于 2026-09</p>
 </footer>
 
 <button id="toTop" title="回到顶部">▲</button>
