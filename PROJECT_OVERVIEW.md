@@ -5,8 +5,8 @@
 | 版本 | 说明 |
 |------|------|
 | 文档状态 | 2026-09-02 依据当前代码库更新（数据源升级 + 精确检索确定性修复后） |
-| 代码位置 | `/home/tjut_lixiang/web-learning/agent/agent-make` |
-| 项目性质 | 学习复现 + 工程化改造的完整 RAG 对话项目（fork 自 `dreamlee0/history-rag-chat`） |
+| 项目性质 | 学习复现 + 工程化改造的完整 RAG 对话系统（历史人物对话） |
+| 代码仓库 | [github.com/dreamlee0/history-rag-chat](https://github.com/dreamlee0/history-rag-chat) |
 
 ---
 
@@ -58,7 +58,7 @@
 - 提供史料**爬虫**（`crawl_knowledge.py`，项目唯一爬虫）、**知识生成**（`generate_knowledge.py`）与**向量库构建**（`build_vector_db.py`）脚本，支持知识库扩展。
 
 ### 2.8 工程化与测试
-- **96 个 pytest 用例**（人物加载、知识库完整性、RAG 检索防污染、防幻觉提示词、记忆隔离、
+- **110 个 pytest 用例**（人物加载、知识库完整性、RAG 检索防污染、防幻觉提示词、记忆隔离、
   双轨数据源、多格式文档解析、抓取器、端到端引用校验等）；
 - Dev Container + Streamlit Cloud 部署支持。
 
@@ -199,7 +199,7 @@ agent-make/
 │   ├── app.py                 # Streamlit 主应用（Secrets 桥接/界面/会话）
 │   ├── styles.py              # 水墨丹青 CSS
 │   └── export_utils.py        # Markdown/PDF 导出
-├── tests/                     # 96 个 pytest 用例（13 个测试模块）
+├── tests/                     # 110 个 pytest 用例（13 个测试模块）
 ├── images/                    # 项目截图
 ├── .devcontainer/             # Dev Container 开发环境
 ├── .streamlit/config.toml     # Streamlit 服务器配置
@@ -270,7 +270,7 @@ streamlit run web/app.py
 
 ## 八、测试
 
-**96 个用例**，覆盖 13 个测试模块：
+**110 个用例**（`python -m pytest tests/` 实际收集），覆盖 13 个测试模块：
 
 | 模块 | 覆盖内容 |
 |------|----------|

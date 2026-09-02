@@ -429,8 +429,10 @@ gushiwen 章节未覆盖，6 人无正史列传按设计走维基（维基不可
 - **枚举式（Case 2）**：枚举词（有哪些/哪些是…）+ 分类名词（诗人/名将/皇帝…）
   且非自指 → 全局池多样性检索 + 按人物去重（覆盖"唐朝有哪些著名的诗人"这类
   点名不出现的题）；
-- 联合池取 top-`multi_top_k`（7），重排沿用 HybridReranker；multi 分支跳过
-  ratio/strong_global 单人物门。
+- 候选池放大（`fetch_k = max(k*3, rerank_k_fetch)`，仅作取池下限）后**按人物去重**
+  ——每人保留检索序最优 1 条直到凑满 `multi_top_k`（7）；multi 分支**不做标准重排**
+  （人物多样性优先，重排会打乱去重后的人物覆盖，见 `_retrieve_multi` docstring），
+  并跳过 ratio/strong_global/named_other 单人物门。
 
 **结果**（`evaluate_retrieval_full.py`，k 口径随检索分支升级为 top-7）：
 
