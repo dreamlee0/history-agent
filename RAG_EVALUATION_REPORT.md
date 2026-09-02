@@ -9,7 +9,7 @@
 > 多相关 Recall@7 0.745、在线 Faithfulness/Relevancy/Citation 已实跑，详见其 §14）。
 
 > **测评日期**:2026-08-18
-> **测评对象**:history-rag-chat（`/home/tjut_lixiang/web-learning/agent/agent-make`，LangChain + Chroma + bge-small-zh + GLM-4.5-flash）
+> **测评对象**:history-rag-chat（LangChain + Chroma + bge-small-zh + GLM-4.5-flash）
 > **测评方法**:检索层指标为**真实运行评测**（本地 30 条带标注评测集）；工程指标为**实测**（pytest / coverage / 压测计时）；生成层指标为**机制设计与测试验证**（未调用付费 LLM，如实标注）
 
 ---

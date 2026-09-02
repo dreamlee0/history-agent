@@ -106,7 +106,7 @@
         │ 数据层           │  │ 配置层     │   │ 工具链           │
         │ data/knowledge  │  │ config/    │   │ scripts/(爬虫/  │
         │ (99篇史料)      │  │ settings   │   │ 构建向量库/生成) │
-        │ data/characters │  │ (.env/     │   │ tests/(22用例)  │
+        │ data/characters │  │ (.env/     │   │ tests/(110用例) │
         │ (97位YAML)      │  │ Secrets)   │   │                 │
         └─────────────────┘  └───────────┘   └─────────────────┘
 ```
@@ -171,7 +171,7 @@ LLM 用 `deepseek-v4-flash`（低成本）+ Embedding 本地化（零 API 成本
 ## 五、目录结构
 
 ```
-agent-make/
+history-rag-chat/
 ├── config/
 │   └── settings.py            # pydantic-settings 配置（LLM/Embedding/向量库/DB）
 ├── data/
