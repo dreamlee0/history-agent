@@ -1,6 +1,6 @@
 # history-rag-chat 检索质量综合测评报告（扩展评测集 · 改进前后对比）
 
-> 测评日期：2026-09-02（当前确定性实测）｜ 对象：历史人物对话 Agent（LangChain + Chroma + bge-small-zh-v1.5 + DeepSeek-v4-flash）
+> 测评日期：2026-09-02（当前确定性实测）｜ 对象：history-rag-chat（LangChain + Chroma + bge-small-zh-v1.5 + DeepSeek-v4-flash）
 > 独立于基础评测（`RAG_EVALUATION_REPORT.md`，26 条受控集）；本报告使用扩展评测集（44 条起步，第三轮扩容至 198 条），
 > 在同一向量库 / 同一评测脚本上给出**改进前 → 改进后**多轮实测对比，数据可一键复现（§12）。
 > **第三轮（2026-09-02）** 五大问题整改（97/97 资料补全 / 多相关联合检索 / 决策门简化 / 测试扩容 / 在线验证）见 **§14**。
