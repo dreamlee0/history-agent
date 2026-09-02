@@ -13,6 +13,7 @@ build/
 data/history_chat.db
 *.db
 *.log
+.coverage
 .claude/
 
 # 说明：data/vector_db/（Chroma 向量库二进制）特意【不忽略】，随仓库提交，

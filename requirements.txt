@@ -23,6 +23,7 @@ python-docx>=0.8.11
 beautifulsoup4>=4.12.0
 lxml>=4.9.0
 requests>=2.31.0
+curl_cffi>=0.16.0  # 百度百科抓取：Chrome TLS 指纹绕过 WAF 403（可选，缺省时退回 requests）
 
 # Web UI
 streamlit>=1.30.0

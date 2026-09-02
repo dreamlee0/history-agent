@@ -2,12 +2,17 @@
 from pathlib import Path
 
 from src.retrievers.vector_store import load_knowledge_files
+from src.characters.character_manager import character_manager
 
 KNOWLEDGE_DIR = Path("data/knowledge")
 
 
 def _docs():
     return load_knowledge_files(str(KNOWLEDGE_DIR))
+
+
+def _characters() -> set:
+    return set(character_manager.list_names())
 
 
 def test_knowledge_files_loaded():
@@ -48,3 +53,18 @@ def test_sui_yangdi_has_canal():
     docs = {d.metadata.get("character"): d for d in _docs()}
     yangdi = docs["隋炀帝"]
     assert "大运河" in yangdi.page_content
+
+
+def test_all_97_characters_have_historical_source():
+    """回归（阶段1 资料补全）：97/97 位人物都必须有【真实史源】知识文件，
+    不再允许任何人物退回 persona 摘要兜底。
+
+    historical 判定：真实史源（gushiwen 古籍原文 / 百度百科 / ctext）不带
+    `_内置` 后缀 → doc_type=historical；persona 摘要（`_内置`）→ persona。
+    """
+    chars_with_hist = {
+        d.metadata.get("character") for d in _docs()
+        if d.metadata.get("doc_type") == "historical"
+    }
+    missing = sorted(name for name in _characters() if name not in chars_with_hist)
+    assert not missing, f"以下人物缺少真实史源（historical）知识文件: {missing}"

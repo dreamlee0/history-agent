@@ -1,0 +1,382 @@
+{
+ "史记|五帝本纪": {
+  "character": "舜",
+  "gushiwen_name": "五帝本纪第一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_8298f4e42962.aspx"
+ },
+ "史记|夏本纪": {
+  "character": "禹",
+  "gushiwen_name": "夏本纪第二",
+  "url": "https://www.gushiwen.cn/guwen/bookv_0552493bfe6f.aspx"
+ },
+ "史记|殷本纪": {
+  "character": "商汤",
+  "gushiwen_name": "殷本纪第三",
+  "url": "https://www.gushiwen.cn/guwen/bookv_74baa63a3674.aspx"
+ },
+ "史记|周本纪": {
+  "character": "周武王",
+  "gushiwen_name": "周本纪第四",
+  "url": "https://www.gushiwen.cn/guwen/bookv_88b9d3d55e0f.aspx"
+ },
+ "史记|鲁周公世家": {
+  "character": "周公",
+  "gushiwen_name": "鲁周公世家第三",
+  "url": "https://www.gushiwen.cn/guwen/bookv_0db4ed780a8b.aspx"
+ },
+ "史记|齐太公世家": {
+  "character": "姜子牙",
+  "gushiwen_name": "齐太公世家第二",
+  "url": "https://www.gushiwen.cn/guwen/bookv_422b7ed0b291.aspx"
+ },
+ "史记|老子韩非列传": {
+  "character": "老子",
+  "gushiwen_name": "老子韩非列传第三",
+  "url": "https://www.gushiwen.cn/guwen/bookv_66bf9111c262.aspx"
+ },
+ "史记|孔子世家": {
+  "character": "孔子",
+  "gushiwen_name": "孔子世家第十七",
+  "url": "https://www.gushiwen.cn/guwen/bookv_5b2570465cd7.aspx"
+ },
+ "史记|孙子吴起列传": {
+  "character": "孙武",
+  "gushiwen_name": "孙子吴起列传第五",
+  "url": "https://www.gushiwen.cn/guwen/bookv_67f14e6f5c3b.aspx"
+ },
+ "史记|孟子荀卿列传": {
+  "character": "墨子",
+  "gushiwen_name": "孟子荀卿列传第十四",
+  "url": "https://www.gushiwen.cn/guwen/bookv_6ea515cea4af.aspx"
+ },
+ "史记|越王勾践世家": {
+  "character": "范蠡",
+  "gushiwen_name": "越王勾践世家第十一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_f74b8c732a60.aspx"
+ },
+ "史记|商君列传": {
+  "character": "商鞅",
+  "gushiwen_name": "商君列传第八",
+  "url": "https://www.gushiwen.cn/guwen/bookv_294ca85f5800.aspx"
+ },
+ "史记|屈原贾生列传": {
+  "character": "屈原",
+  "gushiwen_name": "屈原贾生列传第二十四",
+  "url": "https://www.gushiwen.cn/guwen/bookv_654796afc206.aspx"
+ },
+ "史记|廉颇蔺相如列传": {
+  "character": "蔺相如",
+  "gushiwen_name": "廉颇蔺相如列传第二十一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_fe564cb98c22.aspx"
+ },
+ "史记|白起王翦列传": {
+  "character": "白起",
+  "gushiwen_name": "白起王翦列传第十三",
+  "url": "https://www.gushiwen.cn/guwen/bookv_3a0a0217d3d7.aspx"
+ },
+ "史记|秦始皇本纪": {
+  "character": "秦始皇",
+  "gushiwen_name": "秦始皇本纪第六",
+  "url": "https://www.gushiwen.cn/guwen/bookv_90cad56079b1.aspx"
+ },
+ "史记|李斯列传": {
+  "character": "李斯",
+  "gushiwen_name": "李斯列传第二十七",
+  "url": "https://www.gushiwen.cn/guwen/bookv_3ad575d172c4.aspx"
+ },
+ "史记|蒙恬列传": {
+  "character": "蒙恬",
+  "gushiwen_name": "蒙恬列传第二十八",
+  "url": "https://www.gushiwen.cn/guwen/bookv_b4aac3d6bb42.aspx"
+ },
+ "史记|高祖本纪": {
+  "character": "刘邦",
+  "gushiwen_name": "高祖本纪第八",
+  "url": "https://www.gushiwen.cn/guwen/bookv_526a64b97f4d.aspx"
+ },
+ "史记|留侯世家": {
+  "character": "张良",
+  "gushiwen_name": "留侯世家第二十五",
+  "url": "https://www.gushiwen.cn/guwen/bookv_95c7c7f69494.aspx"
+ },
+ "史记|淮阴侯列传": {
+  "character": "韩信",
+  "gushiwen_name": "淮阴侯列传第三十二",
+  "url": "https://www.gushiwen.cn/guwen/bookv_30856b7cc757.aspx"
+ },
+ "史记|萧相国世家": {
+  "character": "萧何",
+  "gushiwen_name": "萧相国世家第二十三",
+  "url": "https://www.gushiwen.cn/guwen/bookv_3bd0e4ceeb55.aspx"
+ },
+ "史记|卫将军骠骑列传": {
+  "character": "霍去病",
+  "gushiwen_name": "卫将军骠骑列传第五十一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_e33a02748084.aspx"
+ },
+ "史记|大宛列传": {
+  "character": "张骞",
+  "gushiwen_name": "大宛列传第六十三",
+  "url": "https://www.gushiwen.cn/guwen/bookv_0ad8e1b157cc.aspx"
+ },
+ "史记|太史公自序": {
+  "character": "司马迁",
+  "gushiwen_name": "太史公自序第七十",
+  "url": "https://www.gushiwen.cn/guwen/bookv_9fe7db3c2ab7.aspx"
+ },
+ "史记|孝武本纪": {
+  "character": "汉武帝",
+  "gushiwen_name": "孝武本纪第十二",
+  "url": "https://www.gushiwen.cn/guwen/bookv_74a2ab9246ce.aspx"
+ },
+ "汉书|高帝纪": {
+  "character": "刘邦",
+  "gushiwen_name": "高帝纪上第一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_98da0545493e.aspx"
+ },
+ "汉书|司马迁传": {
+  "character": "司马迁",
+  "gushiwen_name": "司马迁传第三十三",
+  "url": "https://www.gushiwen.cn/guwen/bookv_b9a8aae96fcf.aspx"
+ },
+ "汉书|武帝纪": {
+  "character": "汉武帝",
+  "gushiwen_name": "武帝纪第七",
+  "url": "https://www.gushiwen.cn/guwen/bookv_c56335dd9737.aspx"
+ },
+ "三国志|武帝纪": {
+  "character": "曹操",
+  "gushiwen_name": "武帝纪第一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_0138593aee5d.aspx"
+ },
+ "三国志|先主传": {
+  "character": "刘备",
+  "gushiwen_name": "先主传第二",
+  "url": "https://www.gushiwen.cn/guwen/bookv_ebbb3f2eac18.aspx"
+ },
+ "三国志|关羽传": {
+  "character": "关羽",
+  "gushiwen_name": "关张马黄赵传第六",
+  "url": "https://www.gushiwen.cn/guwen/bookv_7ecf09c48948.aspx"
+ },
+ "三国志|张飞传": {
+  "character": "张飞",
+  "gushiwen_name": "关张马黄赵传第六",
+  "url": "https://www.gushiwen.cn/guwen/bookv_7ecf09c48948.aspx"
+ },
+ "三国志|赵云传": {
+  "character": "赵云",
+  "gushiwen_name": "关张马黄赵传第六",
+  "url": "https://www.gushiwen.cn/guwen/bookv_7ecf09c48948.aspx"
+ },
+ "三国志|周瑜传": {
+  "character": "周瑜",
+  "gushiwen_name": "周瑜鲁肃吕蒙传第九",
+  "url": "https://www.gushiwen.cn/guwen/bookv_a51ab90fbeef.aspx"
+ },
+ "三国志|吴主传": {
+  "character": "孙权",
+  "gushiwen_name": "吴主传第二",
+  "url": "https://www.gushiwen.cn/guwen/bookv_7d05b64d141c.aspx"
+ },
+ "三国志|诸葛亮传": {
+  "character": "诸葛亮",
+  "gushiwen_name": "诸葛亮传第五",
+  "url": "https://www.gushiwen.cn/guwen/bookv_a67f5265d4d9.aspx"
+ },
+ "隋书|高祖纪": {
+  "character": "隋文帝",
+  "gushiwen_name": "卷一 高祖上",
+  "url": "https://www.gushiwen.cn/guwen/bookv_574b4c5c8206.aspx"
+ },
+ "隋书|炀帝纪": {
+  "character": "隋炀帝",
+  "gushiwen_name": "卷三 炀帝上",
+  "url": "https://www.gushiwen.cn/guwen/bookv_8e9586d5f1cd.aspx"
+ },
+ "旧唐书|太宗本纪": {
+  "character": "唐太宗",
+  "gushiwen_name": "卷二 太宗上",
+  "url": "https://www.gushiwen.cn/guwen/bookv_ff07379960b1.aspx"
+ },
+ "旧唐书|魏徵传": {
+  "character": "唐太宗",
+  "gushiwen_name": "卷二十一 魏徵",
+  "url": "https://www.gushiwen.cn/guwen/bookv_62b4a8d777c7.aspx"
+ },
+ "旧唐书|则天皇后本纪": {
+  "character": "武则天",
+  "gushiwen_name": "卷六 则天皇后",
+  "url": "https://www.gushiwen.cn/guwen/bookv_426c3a262e79.aspx"
+ },
+ "旧唐书|韩愈传": {
+  "character": "韩愈",
+  "gushiwen_name": "卷一百一十 韩愈 张籍 孟郊 唐衢 李翱 宇文籍 刘禹锡 柳宗元 韦辞",
+  "url": "https://www.gushiwen.cn/guwen/bookv_5e65c1041242.aspx"
+ },
+ "旧唐书|方伎传·玄奘": {
+  "character": "玄奘",
+  "gushiwen_name": "卷一百四十一 方伎",
+  "url": "https://www.gushiwen.cn/guwen/bookv_6efd7338e1c6.aspx"
+ },
+ "新唐书|则天皇后传": {
+  "character": "武则天",
+  "gushiwen_name": "卷四 则天皇后 中宗",
+  "url": "https://www.gushiwen.cn/guwen/bookv_fe87fbbfac39.aspx"
+ },
+ "新唐书|韩愈传": {
+  "character": "韩愈",
+  "gushiwen_name": "卷一百零一 韩愈",
+  "url": "https://www.gushiwen.cn/guwen/bookv_a3f358a572dc.aspx"
+ },
+ "宋史|太祖本纪": {
+  "character": "赵匡胤",
+  "gushiwen_name": "卷一 太祖一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_c3beeb4cdadb.aspx"
+ },
+ "宋史|范仲淹传": {
+  "character": "范仲淹",
+  "gushiwen_name": "卷七十三 范仲淹等",
+  "url": "https://www.gushiwen.cn/guwen/bookv_4536ecf514c1.aspx"
+ },
+ "宋史|欧阳修传": {
+  "character": "欧阳修",
+  "gushiwen_name": "卷七十八 欧阳修等",
+  "url": "https://www.gushiwen.cn/guwen/bookv_131026c94a18.aspx"
+ },
+ "宋史|王安石传": {
+  "character": "王安石",
+  "gushiwen_name": "卷八十六 王安石等",
+  "url": "https://www.gushiwen.cn/guwen/bookv_58e691585f80.aspx"
+ },
+ "宋史|司马光传": {
+  "character": "司马光",
+  "gushiwen_name": "卷九十五 司马光 吕公著",
+  "url": "https://www.gushiwen.cn/guwen/bookv_475ed2e87bfc.aspx"
+ },
+ "宋史|苏轼传": {
+  "character": "苏轼",
+  "gushiwen_name": "卷九十七 苏轼",
+  "url": "https://www.gushiwen.cn/guwen/bookv_db4edbb464f5.aspx"
+ },
+ "宋史|辛弃疾传": {
+  "character": "辛弃疾",
+  "gushiwen_name": "卷一百六十 辛弃疾等",
+  "url": "https://www.gushiwen.cn/guwen/bookv_1620f6eff413.aspx"
+ },
+ "宋史|岳飞传": {
+  "character": "岳飞",
+  "gushiwen_name": "卷一百二十四 岳飞",
+  "url": "https://www.gushiwen.cn/guwen/bookv_dba1ee3c619d.aspx"
+ },
+ "元史|太祖本纪": {
+  "character": "成吉思汗",
+  "gushiwen_name": "卷一 太祖",
+  "url": "https://www.gushiwen.cn/guwen/bookv_a73815321615.aspx"
+ },
+ "元史|世祖本纪": {
+  "character": "忽必烈",
+  "gushiwen_name": "卷四 世祖一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_430f295ced4b.aspx"
+ },
+ "明史|太祖本纪": {
+  "character": "朱元璋",
+  "gushiwen_name": "卷一·太祖一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_1ef132395bd6.aspx"
+ },
+ "明史|成祖本纪": {
+  "character": "朱棣",
+  "gushiwen_name": "卷五·成祖一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_a304d949ab50.aspx"
+ },
+ "明史|于谦传": {
+  "character": "于谦",
+  "gushiwen_name": "卷五十八·于谦",
+  "url": "https://www.gushiwen.cn/guwen/bookv_792f348b52d5.aspx"
+ },
+ "明史|海瑞传": {
+  "character": "海瑞",
+  "gushiwen_name": "卷一百一十四·海瑞 丘橓 吕坤 郭正域",
+  "url": "https://www.gushiwen.cn/guwen/bookv_d2b75a34b81b.aspx"
+ },
+ "明史|戚继光传": {
+  "character": "戚继光",
+  "gushiwen_name": "卷一百·俞大猷 戚继光 刘显 李锡 张元勋",
+  "url": "https://www.gushiwen.cn/guwen/bookv_bc035440414f.aspx"
+ },
+ "明史|方伎传·李时珍": {
+  "character": "李时珍",
+  "gushiwen_name": "卷一百八十七·方伎",
+  "url": "https://www.gushiwen.cn/guwen/bookv_67505cbe415b.aspx"
+ },
+ "明史|王守仁传": {
+  "character": "王阳明",
+  "gushiwen_name": "卷八十三·王守仁",
+  "url": "https://www.gushiwen.cn/guwen/bookv_f7bba4dcea32.aspx"
+ },
+ "明史|张居正传": {
+  "character": "张居正",
+  "gushiwen_name": "卷一百零一·徐阶 高拱 张居正",
+  "url": "https://www.gushiwen.cn/guwen/bookv_22038ad5a193.aspx"
+ },
+ "清史稿|圣祖本纪": {
+  "character": "康熙",
+  "gushiwen_name": "卷六 圣祖本纪一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_688fc9ae2e22.aspx"
+ },
+ "清史稿|世宗本纪": {
+  "character": "雍正",
+  "gushiwen_name": "卷九 世宗本纪",
+  "url": "https://www.gushiwen.cn/guwen/bookv_9ae663a23572.aspx"
+ },
+ "清史稿|高宗本纪": {
+  "character": "乾隆",
+  "gushiwen_name": "卷十 高宗本纪一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_98b58429cb45.aspx"
+ },
+ "清史稿|和珅传": {
+  "character": "和珅",
+  "gushiwen_name": "卷一百零六 敏中 和珅弟和琳 苏凌阿",
+  "url": "https://www.gushiwen.cn/guwen/bookv_507723f66fd0.aspx"
+ },
+ "清史稿|林则徐传": {
+  "character": "林则徐",
+  "gushiwen_name": "卷一百五十六 林则徐 邓廷桢达洪阿",
+  "url": "https://www.gushiwen.cn/guwen/bookv_b3220e8fb3ed.aspx"
+ },
+ "清史稿|曾国藩传": {
+  "character": "曾国藩",
+  "gushiwen_name": "卷一百九十二 曾国藩",
+  "url": "https://www.gushiwen.cn/guwen/bookv_60e6623de7ab.aspx"
+ },
+ "清史稿|左宗棠传": {
+  "character": "左宗棠",
+  "gushiwen_name": "卷一百九十九 左宗棠",
+  "url": "https://www.gushiwen.cn/guwen/bookv_fbb24135706b.aspx"
+ },
+ "清史稿|李鸿章传": {
+  "character": "李鸿章",
+  "gushiwen_name": "卷一百九十八 李鸿章",
+  "url": "https://www.gushiwen.cn/guwen/bookv_657274b65039.aspx"
+ },
+ "清史稿|张之洞传": {
+  "character": "张之洞",
+  "gushiwen_name": "卷二百二十四 荣禄 王文韶 张之洞 瞿鸿禨",
+  "url": "https://www.gushiwen.cn/guwen/bookv_8b7feb918274.aspx"
+ },
+ "清史稿|后妃传·孝钦显皇后": {
+  "character": "慈禧",
+  "gushiwen_name": "卷一 后妃",
+  "url": "https://www.gushiwen.cn/guwen/bookv_b782d17f82e4.aspx"
+ },
+ "新五代史|南唐世家": {
+  "character": "李煜",
+  "gushiwen_name": "南唐世家第二",
+  "url": "https://www.gushiwen.cn/guwen/bookv_d8c3fbb10d27.aspx"
+ },
+ "新五代史|周本纪·世宗": {
+  "character": "柴荣",
+  "gushiwen_name": "周本纪第十一",
+  "url": "https://www.gushiwen.cn/guwen/bookv_2d1d14ee541c.aspx"
+ }
+}

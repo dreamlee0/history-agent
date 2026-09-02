@@ -84,7 +84,7 @@ history-rag-chat/
 │   │   ├── qing/            # Qing
 │   │   ├── wudai/           # Five Dynasties
 │   │   └── minguo/          # Republic of China
-│   ├── knowledge/           # Historical source corpus (99 docs)
+│   ├── knowledge/           # Dual-track corpus: 99 persona + 107 historical (gushiwen/baike/ctext)
 │   ├── eval/                # Labeled eval set
 │   └── vector_db/           # Chroma vector DB
 ├── scripts/                 # Utility scripts
@@ -149,23 +149,113 @@ Confucius: The way of the junzi lies in cultivating oneself, harmonizing the fam
 | LLM_API_KEY | DeepSeek API key (or any OpenAI-compatible key) | - |
 | LLM_BASE_URL | LLM endpoint | https://api.deepseek.com |
 | LLM_MODEL | Model name | deepseek-v4-flash |
+| LLM_MAX_TOKENS | Max generation tokens (deepseek-v4-flash's reasoning_content eats the budget; without a cap the reply can come back empty — 1024 verified stable in online eval) | 1024 |
 | EMBEDDING_MODEL | Embedding model (local HuggingFace) | BAAI/bge-small-zh-v1.5 |
 | VECTOR_DB_PATH | Vector DB path | ./data/vector_db |
 | DB_PATH | Chat DB path | ./data/history_chat.db |
 | MAX_HISTORY | History turns injected into the LLM context | 10 |
-| FILTERED_SCORE_RATIO | Cross-figure pollution-prevention threshold (see "Evaluation") | 1.20 |
-| RETRIEVAL_MODE | Retrieval mode: `similarity` \| `mmr` (maximal marginal relevance) | similarity |
+| FILTERED_SCORE_RATIO | Cross-figure pollution-prevention threshold (calibrated on the 159-item train split, validated on holdout; 1.25 optimal) | 1.25 |
+| RAG_TOP_K | Number of source passages returned to the LLM (`_retrieve_knowledge` default k) | 3 |
+| MULTI_TOP_K | Passages returned by the multi-figure joint-retrieval branch (named ≥2 people or enumeration queries; covers 3-7 expected figures; eval multi subset measures Recall at this k) | 7 |
+| RETRIEVAL_MODE | Retrieval mode: `similarity` (dense) \| `hybrid` (dense + BM25 lexical RRF fusion recall, see "Evaluation") | similarity |
+| HYBRID_BM25_K | BM25 candidate count on the lexical side of hybrid retrieval | 30 |
+| HYBRID_RRF_K | Hybrid retrieval RRF fusion constant (same convention as the reranker) | 60 |
 | CONVERSATION_RETENTION_DAYS | Conversation retention days; purged by `scripts/cleanup_db.py` beyond this; 0=never | 0 |
+| RERANK_MODE | Rerank mode: `hybrid` (jieba+TF-IDF lexical × dense RRF fusion, fully offline) \| `cross_encoder` (bge-reranker, requires local cache) \| `none` | hybrid |
+| RERANK_K_FETCH | Candidate-pool size before rerank (retrieve k_fetch, then rerank to top-k) | 15 |
+| STRONG_GLOBAL_THRESHOLD | Decision gate 1: strong-global relevance threshold | 0.70 |
+| GAP_THRESHOLD | Decision gate 1: distance-gap threshold for "filtered clearly worse than global" | 0.10 |
+| PERSONA_FALLBACK | Dual-track switch: `true` (default) persona is retrievable but labeled "built-in summary · non-authoritative" and real sources take priority; `false` (strict mode) persona is fully removed from historical retrieval — only real sources are retrievable/citable | true |
+| LLM_PRICE_IN / LLM_PRICE_OUT | LLM pricing (¥/1M tokens, used only by the offline cost-estimation script, not real billing) | 1.0 / 2.0 |
+
+## 📜 Data Sources（Dual-track corpus）
+
+The knowledge base is a **dual-track data source** (see [DATA_SOURCES.md](DATA_SOURCES.md) for details):
+
+- **Real historical sources (`doc_type=historical`)** — excerpts of classical-text originals from
+  gushiwen.cn (the primary source, fully ingested), ctext.org, and **Baidu Baike** (21 articles covering
+  figures with no mapped official-history chapter; tertiary source, labeled as such). Annotated with
+  **dynasty · book · chapter** (e.g. 春秋·《史记·孔子世家》); these are citable as grounding for answers.
+  **All 97 figures now have a historical file** (107 historical + 99 persona);
+- **Persona (`doc_type=persona`)** — built-in LLM-generated summaries (99 files with `_内置` suffix),
+  used only as language-style reference / role setting, **not as factual basis**; citations are labeled
+  "（内置摘要·非权威史源）" (built-in summary · non-authoritative).
+
+Citation format: the source block header shows `出处: 春秋·《史记·孔子世家》 - 古诗文网（gushiwen.cn）`,
+the footer `【参考史料】[1]《史记·孔子世家》- 春秋·古诗文网（gushiwen.cn)`; with `PERSONA_FALLBACK=off`,
+persona is fully excluded from historical retrieval. The 97-figure → source mapping table lives in
+`data/sources/character_sources.json` (focused on the 97 figures, not the whole 二十四史). Network reality
+check: ctext.org is blocked (403 anti-crawling) and Chinese Wikipedia is unreachable, so the primary
+classical-text source was switched to **gushiwen.cn** (see DATA_SOURCES.md「网络实测与源切换」).
+
+```bash
+# Print the crawl plan offline (URL list, no network); drop --dry-run to crawl for real
+python scripts/crawl_knowledge.py --dry-run
+python scripts/crawl_knowledge.py --sources all      # gushiwen originals + Chinese Wikipedia
+python scripts/crawl_knowledge.py --sources gushiwen # gushiwen originals only (verified in this env)
+python scripts/crawl_knowledge.py --characters 李白,孔子
+```
 
 ## 📏 Evaluation（A "ruler" for retrieval）
 
-Labeled eval set `data/eval/retrieval_eval.json` (26 items: ask-about-self / ask-about-others / ask-about-events, including "the figure's own bio is a trap" cases) + script `scripts/evaluate_retrieval.py`:
+Two labeled eval sets (**198 items**, stratified into train/holdout) + retrieval / latency / end-to-end / online-generation scripts:
 
 ```bash
+# Basic set (26 items: ask-about-self / ask-about-others / ask-about-events,
+# including "the figure's own bio is a trap" cases)
 python scripts/evaluate_retrieval.py          # hit@1/hit@3/MRR + pollution-gate decision accuracy
-python scripts/evaluate_retrieval.py --sweep  # threshold sweep (FILTERED_SCORE_RATIO=1.20 calibrated here)
+python scripts/evaluate_retrieval.py --sweep  # threshold sweep (FILTERED_SCORE_RATIO=1.25 calibrated here)
 python scripts/evaluate_retrieval.py --llm-grounding 5   # optional: real-LLM citation grounding check (paid)
+
+# Extended set (198 items: 145 single-relevant / 31 multi-relevant enumeration / 22 out-of-KB negatives; train 159 / holdout 39)
+python scripts/evaluate_retrieval_full.py          # hit@k / MRR / decision accuracy / multi-relevant Recall@7 / RAGAS context metrics / out-of-KB rejection rate
+python scripts/evaluate_retrieval_full.py --split train      # eval on the train split only (threshold recalibration)
+python scripts/evaluate_retrieval_full.py --split holdout    # generalization metrics reported here only
+python scripts/evaluate_retrieval_full.py --sweep --split train  # threshold sweep (calibrated on train)
+RETRIEVAL_MODE=hybrid python scripts/evaluate_retrieval_full.py  # hybrid retrieval (BM25×dense) comparison
+
+# Latency / cost profiling (offline): per-stage p50/p90/mean (retrieval/rerank/LLM estimate/one-time cost)
+python scripts/benchmark_retrieval.py --limit 20
+python scripts/benchmark_retrieval.py --limit 20 --out bench.json   # dump results to file
+
+# End-to-end evaluation: Mock LLM runs the full chat() pipeline offline (routing / citation grounding / latency); --llm live calls the real model (198 items verified, see report §14.5)
+python scripts/evaluate_end_to_end.py
+python scripts/evaluate_end_to_end.py --bad-cite   # verify out-of-range citations are dropped
+python scripts/evaluate_end_to_end.py --llm live   # real model (requires DeepSeek key in .env)
+
+# Online generation eval (RAGAS-style, real LLM, requires .env DeepSeek key; --cache resumes incrementally)
+python scripts/evaluate_generation.py --limit 8 --cache /tmp/gen_cache.json   # smoke test
+python scripts/evaluate_generation.py --cache /tmp/gen_cache.json             # full 198 items
+python scripts/evaluate_generation.py --split holdout --cache ...             # holdout only
+# Reports Faithfulness / Answer Relevancy / Citation Accuracy / citation coverage / JSON parse-failure rate
 ```
+
+**Current results (2026-09-02; retrieval deterministic & offline, generation on real DeepSeek-v4-flash)**:
+- Multi-relevant Recall@7 **0.745** (train 0.732 / holdout 0.803; baseline @3 = 0.307); out-of-KB rejection **22/22**, self-bio injection 0/22;
+- Single-relevant hit@1 0.897 / MRR 0.933 / decision accuracy 0.986 (no regression); unit tests 110/110;
+- Online generation: Faithfulness **0.227** / Answer Relevancy **0.570** / Citation Accuracy **0.740** / citation coverage 0.773 (train ≈ holdout — no overfitting).
+
+Full multi-round comparison data:
+[RAG_EVALUATION_REPORT_FULL.md](RAG_EVALUATION_REPORT_FULL.md) (§7 hybrid comparison / §8 latency-cost / §9 end-to-end / §10 multi-format parsing / §12 reproduction / **§14 five-problem overhaul**).
+
+### 📄 Multi-format Document Parsing
+
+The knowledge base no longer accepts only `*.txt`: `src/retrievers/document_loader.py` parses
+**txt / md / html / pdf / docx / xml / json / csv / tsv / xlsx** uniformly into `Document`
+(front-matter `【来源】【URL】【人物】【分类】` plus source annotations `【朝代】【出处】【篇卷】` +
+`---` body separator, character inferred from filename, alias completion, automatic `doc_type`
+persona/historical detection, dynasty backfilled from the character profile — same semantics as the
+legacy txt path). Scanned PDFs (no text layer) and unknown extensions are skipped (no OCR). Ingesting
+new knowledge:
+
+```bash
+# Incremental: only add new docs (dedup by file metadata, idempotent)
+python scripts/ingest_documents.py --src data/documents_sample
+# Full rebuild (clear, then rebuild from data/knowledge in all formats)
+python scripts/ingest_documents.py --src data/knowledge --mode rebuild
+```
+
+Sample corpus in `data/documents_sample/` (md / html / json / csv, out-of-KB figure "张衡").
 
 ## ✅ Verifiable Citations（Hardened grounding）
 

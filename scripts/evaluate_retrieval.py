@@ -171,7 +171,6 @@ def main():
             return
         cited = grounded = llm_hits = 0
         for idx, item in enumerate(items[: args.llm_grounding]):
-            from src.agents import HistoryCharacterAgent as RealAgent
             char = character_manager.get_character(item["asker"])
             agent = RealAgent(char, vs, None)   # db=None：仅对话不回写数据库
             try:

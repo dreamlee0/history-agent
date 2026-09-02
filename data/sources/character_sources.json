@@ -1,0 +1,1175 @@
+{
+  "黄帝": {
+    "dynasty": "上古",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "五帝本纪",
+        "ctext": "https://ctext.org/shiji/wu-di-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "黄帝",
+    "note": ""
+  },
+  "炎帝": {
+    "dynasty": "上古",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "五帝本纪",
+        "ctext": "https://ctext.org/shiji/wu-di-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "炎帝",
+    "note": ""
+  },
+  "尧": {
+    "dynasty": "上古",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "五帝本纪",
+        "ctext": "https://ctext.org/shiji/wu-di-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "尧",
+    "note": ""
+  },
+  "舜": {
+    "dynasty": "上古",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "五帝本纪",
+        "ctext": "https://ctext.org/shiji/wu-di-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "舜",
+    "note": ""
+  },
+  "禹": {
+    "dynasty": "上古",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "夏本纪",
+        "ctext": "https://ctext.org/shiji/xia-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "大禹",
+    "note": ""
+  },
+  "商汤": {
+    "dynasty": "商朝",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "殷本纪",
+        "ctext": "https://ctext.org/shiji/yin-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "商汤",
+    "note": ""
+  },
+  "周文王": {
+    "dynasty": "西周",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "周本纪",
+        "ctext": "https://ctext.org/shiji/zhou-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "周文王",
+    "note": ""
+  },
+  "周武王": {
+    "dynasty": "西周",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "周本纪",
+        "ctext": "https://ctext.org/shiji/zhou-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "周武王",
+    "note": ""
+  },
+  "周公": {
+    "dynasty": "西周",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "鲁周公世家",
+        "ctext": "https://ctext.org/shiji/lu-zhou-gong-shi-jia/zh"
+      }
+    ],
+    "wikipedia": "周公旦",
+    "note": ""
+  },
+  "姜子牙": {
+    "dynasty": "西周",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "齐太公世家",
+        "ctext": "https://ctext.org/shiji/qi-tai-gong-shi-jia/zh"
+      }
+    ],
+    "wikipedia": "姜子牙",
+    "note": ""
+  },
+  "老子": {
+    "dynasty": "春秋",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "老子韩非列传",
+        "ctext": "https://ctext.org/shiji/lao-zi-han-fei-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "老子",
+    "note": ""
+  },
+  "孔子": {
+    "dynasty": "春秋",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "孔子世家",
+        "ctext": "https://ctext.org/shiji/kongzi-shi-jia/zh"
+      }
+    ],
+    "wikipedia": "孔子",
+    "note": ""
+  },
+  "孙武": {
+    "dynasty": "春秋",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "孙子吴起列传",
+        "ctext": "https://ctext.org/shiji/sun-zi-wu-qi-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "孙武",
+    "note": ""
+  },
+  "墨子": {
+    "dynasty": "春秋",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "孟子荀卿列传",
+        "ctext": "https://ctext.org/shiji/meng-zi-xun-qing-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "墨子",
+    "note": "史记本传极简，正文以《墨子》诸篇与维基为主"
+  },
+  "范蠡": {
+    "dynasty": "春秋",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "越王勾践世家",
+        "ctext": "https://ctext.org/shiji/yue-wang-gou-jian-shi-jia/zh"
+      }
+    ],
+    "wikipedia": "范蠡",
+    "note": ""
+  },
+  "商鞅": {
+    "dynasty": "战国",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "商君列传",
+        "ctext": "https://ctext.org/shiji/shang-jun-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "商鞅",
+    "note": ""
+  },
+  "屈原": {
+    "dynasty": "战国",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "屈原贾生列传",
+        "ctext": "https://ctext.org/shiji/qu-yuan-jia-sheng-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "屈原",
+    "note": ""
+  },
+  "蔺相如": {
+    "dynasty": "战国",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "廉颇蔺相如列传",
+        "ctext": "https://ctext.org/shiji/lian-po-lin-xiang-ru-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "蔺相如",
+    "note": ""
+  },
+  "白起": {
+    "dynasty": "战国",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "白起王翦列传",
+        "ctext": "https://ctext.org/shiji/bai-qi-wang-jian-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "白起",
+    "note": ""
+  },
+  "秦始皇": {
+    "dynasty": "秦朝",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "秦始皇本纪",
+        "ctext": "https://ctext.org/shiji/qin-shi-huang-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "秦始皇",
+    "note": ""
+  },
+  "李斯": {
+    "dynasty": "秦朝",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "李斯列传",
+        "ctext": "https://ctext.org/shiji/li-si-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "李斯",
+    "note": ""
+  },
+  "蒙恬": {
+    "dynasty": "秦朝",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "蒙恬列传",
+        "ctext": "https://ctext.org/shiji/meng-tian-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "蒙恬",
+    "note": ""
+  },
+  "刘邦": {
+    "dynasty": "西汉",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "高祖本纪",
+        "ctext": "https://ctext.org/shiji/gao-zu-ben-ji/zh"
+      },
+      {
+        "book": "汉书",
+        "chapter": "高帝纪",
+        "ctext": "https://ctext.org/hanshu/gao-di-ji/zh"
+      }
+    ],
+    "wikipedia": "汉高祖",
+    "note": ""
+  },
+  "张良": {
+    "dynasty": "西汉",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "留侯世家",
+        "ctext": "https://ctext.org/shiji/liu-hou-shi-jia/zh"
+      }
+    ],
+    "wikipedia": "张良",
+    "note": ""
+  },
+  "韩信": {
+    "dynasty": "西汉",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "淮阴侯列传",
+        "ctext": "https://ctext.org/shiji/huai-yin-hou-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "韩信",
+    "note": ""
+  },
+  "萧何": {
+    "dynasty": "西汉",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "萧相国世家",
+        "ctext": "https://ctext.org/shiji/xiao-xiang-guo-shi-jia/zh"
+      }
+    ],
+    "wikipedia": "萧何",
+    "note": ""
+  },
+  "卫青": {
+    "dynasty": "西汉",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "卫将军骠骑列传",
+        "ctext": "https://ctext.org/shiji/wei-jiang-jun-piao-ji-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "卫青",
+    "note": ""
+  },
+  "霍去病": {
+    "dynasty": "西汉",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "卫将军骠骑列传",
+        "ctext": "https://ctext.org/shiji/wei-jiang-jun-piao-ji-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "霍去病",
+    "note": ""
+  },
+  "张骞": {
+    "dynasty": "西汉",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "大宛列传",
+        "ctext": "https://ctext.org/shiji/da-yuan-lie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "张骞",
+    "note": "正文以《汉书·张骞传》与维基互补"
+  },
+  "司马迁": {
+    "dynasty": "西汉",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "太史公自序",
+        "ctext": "https://ctext.org/shiji/tai-shi-gong-zi-xu/zh"
+      },
+      {
+        "book": "汉书",
+        "chapter": "司马迁传",
+        "ctext": "https://ctext.org/hanshu/si-ma-qian-zhuan/zh"
+      }
+    ],
+    "wikipedia": "司马迁",
+    "note": ""
+  },
+  "汉武帝": {
+    "dynasty": "西汉",
+    "books": [
+      {
+        "book": "史记",
+        "chapter": "孝武本纪",
+        "ctext": "https://ctext.org/shiji/xiao-wu-ben-ji/zh"
+      },
+      {
+        "book": "汉书",
+        "chapter": "武帝纪",
+        "ctext": "https://ctext.org/hanshu/wu-di-ji/zh"
+      }
+    ],
+    "wikipedia": "汉武帝",
+    "note": ""
+  },
+  "曹操": {
+    "dynasty": "东汉末",
+    "books": [
+      {
+        "book": "三国志",
+        "chapter": "武帝纪",
+        "ctext": "https://ctext.org/sanguozhi/wu-di-ji/zh"
+      }
+    ],
+    "wikipedia": "曹操",
+    "note": ""
+  },
+  "刘备": {
+    "dynasty": "三国蜀汉",
+    "books": [
+      {
+        "book": "三国志",
+        "chapter": "先主传",
+        "ctext": "https://ctext.org/sanguozhi/xian-zhu-zhuan/zh"
+      }
+    ],
+    "wikipedia": "刘备",
+    "note": ""
+  },
+  "关羽": {
+    "dynasty": "三国蜀汉",
+    "books": [
+      {
+        "book": "三国志",
+        "chapter": "关羽传",
+        "ctext": "https://ctext.org/sanguozhi/guan-yu-zhuan/zh"
+      }
+    ],
+    "wikipedia": "关羽",
+    "note": ""
+  },
+  "张飞": {
+    "dynasty": "三国蜀汉",
+    "books": [
+      {
+        "book": "三国志",
+        "chapter": "张飞传",
+        "ctext": "https://ctext.org/sanguozhi/zhang-fei-zhuan/zh"
+      }
+    ],
+    "wikipedia": "张飞",
+    "note": ""
+  },
+  "赵云": {
+    "dynasty": "三国蜀汉",
+    "books": [
+      {
+        "book": "三国志",
+        "chapter": "赵云传",
+        "ctext": "https://ctext.org/sanguozhi/zhao-yun-zhuan/zh"
+      }
+    ],
+    "wikipedia": "赵云",
+    "note": ""
+  },
+  "周瑜": {
+    "dynasty": "三国东吴",
+    "books": [
+      {
+        "book": "三国志",
+        "chapter": "周瑜传",
+        "ctext": "https://ctext.org/sanguozhi/zhou-yu-zhuan/zh"
+      }
+    ],
+    "wikipedia": "周瑜",
+    "note": ""
+  },
+  "孙权": {
+    "dynasty": "三国东吴",
+    "books": [
+      {
+        "book": "三国志",
+        "chapter": "吴主传",
+        "ctext": "https://ctext.org/sanguozhi/wu-zhu-zhuan/zh"
+      }
+    ],
+    "wikipedia": "孙权",
+    "note": ""
+  },
+  "司马懿": {
+    "dynasty": "三国曹魏",
+    "books": [
+      {
+        "book": "晋书",
+        "chapter": "宣帝纪",
+        "ctext": "https://ctext.org/jin-shu/xuan-di-ji/zh"
+      }
+    ],
+    "wikipedia": "司马懿",
+    "note": ""
+  },
+  "诸葛亮": {
+    "dynasty": "三国蜀汉",
+    "books": [
+      {
+        "book": "三国志",
+        "chapter": "诸葛亮传",
+        "ctext": "https://ctext.org/sanguozhi/zhuge-liang/zh"
+      }
+    ],
+    "wikipedia": "诸葛亮",
+    "note": ""
+  },
+  "王羲之": {
+    "dynasty": "东晋",
+    "books": [
+      {
+        "book": "晋书",
+        "chapter": "王羲之传",
+        "ctext": "https://ctext.org/jin-shu/wang-xi-zhi-zhuan/zh"
+      }
+    ],
+    "wikipedia": "王羲之",
+    "note": ""
+  },
+  "陶渊明": {
+    "dynasty": "东晋",
+    "books": [
+      {
+        "book": "晋书",
+        "chapter": "陶潜传",
+        "ctext": "https://ctext.org/jin-shu/tao-qian-zhuan/zh"
+      }
+    ],
+    "wikipedia": "陶渊明",
+    "note": ""
+  },
+  "隋文帝": {
+    "dynasty": "隋朝",
+    "books": [
+      {
+        "book": "隋书",
+        "chapter": "高祖纪",
+        "ctext": "https://ctext.org/sui-shu/gao-zu-ji/zh"
+      }
+    ],
+    "wikipedia": "隋文帝",
+    "note": ""
+  },
+  "隋炀帝": {
+    "dynasty": "隋朝",
+    "books": [
+      {
+        "book": "隋书",
+        "chapter": "炀帝纪",
+        "ctext": "https://ctext.org/sui-shu/yang-di-ji/zh"
+      }
+    ],
+    "wikipedia": "隋炀帝",
+    "note": ""
+  },
+  "唐太宗": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "旧唐书",
+        "chapter": "太宗本纪",
+        "ctext": "https://ctext.org/jiu-tang-shu/tai-zong-ben-ji/zh"
+      },
+      {
+        "book": "旧唐书",
+        "chapter": "魏徵传",
+        "ctext": "https://ctext.org/jiu-tang-shu/wei-zheng-zhuan/zh"
+      }
+    ],
+    "wikipedia": "唐太宗",
+    "note": ""
+  },
+  "武则天": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "旧唐书",
+        "chapter": "则天皇后本纪",
+        "ctext": "https://ctext.org/jiu-tang-shu/ze-tian-huang-hou-ben-ji/zh"
+      },
+      {
+        "book": "新唐书",
+        "chapter": "则天皇后传",
+        "ctext": "https://ctext.org/xin-tang-shu/ze-tian-huang-hou-zhuan/zh"
+      }
+    ],
+    "wikipedia": "武则天",
+    "note": ""
+  },
+  "李白": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "新唐书",
+        "chapter": "李白传",
+        "ctext": "https://ctext.org/xin-tang-shu/li-bai-zhuan/zh"
+      },
+      {
+        "book": "旧唐书",
+        "chapter": "李白传",
+        "ctext": "https://ctext.org/jiu-tang-shu/li-bai-zhuan/zh"
+      }
+    ],
+    "wikipedia": "李白",
+    "note": ""
+  },
+  "杜甫": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "新唐书",
+        "chapter": "杜甫传",
+        "ctext": "https://ctext.org/xin-tang-shu/du-fu-zhuan/zh"
+      },
+      {
+        "book": "旧唐书",
+        "chapter": "杜甫传",
+        "ctext": "https://ctext.org/jiu-tang-shu/du-fu-zhuan/zh"
+      }
+    ],
+    "wikipedia": "杜甫",
+    "note": ""
+  },
+  "白居易": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "新唐书",
+        "chapter": "白居易传",
+        "ctext": "https://ctext.org/xin-tang-shu/bai-ju-yi-zhuan/zh"
+      },
+      {
+        "book": "旧唐书",
+        "chapter": "白居易传",
+        "ctext": "https://ctext.org/jiu-tang-shu/bai-ju-yi-zhuan/zh"
+      }
+    ],
+    "wikipedia": "白居易",
+    "note": ""
+  },
+  "王维": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "新唐书",
+        "chapter": "王维传",
+        "ctext": "https://ctext.org/xin-tang-shu/wang-wei-zhuan/zh"
+      }
+    ],
+    "wikipedia": "王维",
+    "note": ""
+  },
+  "韩愈": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "新唐书",
+        "chapter": "韩愈传",
+        "ctext": "https://ctext.org/xin-tang-shu/han-yu-zhuan/zh"
+      },
+      {
+        "book": "旧唐书",
+        "chapter": "韩愈传",
+        "ctext": "https://ctext.org/jiu-tang-shu/han-yu-zhuan/zh"
+      }
+    ],
+    "wikipedia": "韩愈",
+    "note": ""
+  },
+  "颜真卿": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "新唐书",
+        "chapter": "颜真卿传",
+        "ctext": "https://ctext.org/xin-tang-shu/yan-zhen-qing-zhuan/zh"
+      }
+    ],
+    "wikipedia": "颜真卿",
+    "note": ""
+  },
+  "玄奘": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "旧唐书",
+        "chapter": "方伎传·玄奘",
+        "ctext": "https://ctext.org/jiu-tang-shu/fang-ji/zh"
+      }
+    ],
+    "wikipedia": "玄奘",
+    "note": ""
+  },
+  "李商隐": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "旧唐书",
+        "chapter": "文苑传·李商隐",
+        "ctext": "https://ctext.org/jiu-tang-shu/wen-yuan/zh"
+      }
+    ],
+    "wikipedia": "李商隐",
+    "note": ""
+  },
+  "杜牧": {
+    "dynasty": "唐朝",
+    "books": [
+      {
+        "book": "新唐书",
+        "chapter": "杜牧传",
+        "ctext": "https://ctext.org/xin-tang-shu/du-mu-zhuan/zh"
+      }
+    ],
+    "wikipedia": "杜牧",
+    "note": ""
+  },
+  "赵匡胤": {
+    "dynasty": "北宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "太祖本纪",
+        "ctext": "https://ctext.org/song-shi/tai-zu-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "宋太祖",
+    "note": ""
+  },
+  "范仲淹": {
+    "dynasty": "北宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "范仲淹传",
+        "ctext": "https://ctext.org/song-shi/fan-zhong-yan-zhuan/zh"
+      }
+    ],
+    "wikipedia": "范仲淹",
+    "note": ""
+  },
+  "欧阳修": {
+    "dynasty": "北宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "欧阳修传",
+        "ctext": "https://ctext.org/song-shi/ou-yang-xiu-zhuan/zh"
+      }
+    ],
+    "wikipedia": "欧阳修",
+    "note": ""
+  },
+  "王安石": {
+    "dynasty": "北宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "王安石传",
+        "ctext": "https://ctext.org/song-shi/wang-an-shi-zhuan/zh"
+      }
+    ],
+    "wikipedia": "王安石",
+    "note": ""
+  },
+  "司马光": {
+    "dynasty": "北宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "司马光传",
+        "ctext": "https://ctext.org/song-shi/si-ma-guang-zhuan/zh"
+      }
+    ],
+    "wikipedia": "司马光",
+    "note": ""
+  },
+  "苏轼": {
+    "dynasty": "北宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "苏轼传",
+        "ctext": "https://ctext.org/song-shi/su-shi-zhuan/zh"
+      }
+    ],
+    "wikipedia": "苏轼",
+    "note": ""
+  },
+  "辛弃疾": {
+    "dynasty": "南宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "辛弃疾传",
+        "ctext": "https://ctext.org/song-shi/xin-qi-ji-zhuan/zh"
+      }
+    ],
+    "wikipedia": "辛弃疾",
+    "note": ""
+  },
+  "陆游": {
+    "dynasty": "南宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "陆游传",
+        "ctext": "https://ctext.org/song-shi/lu-you-zhuan/zh"
+      }
+    ],
+    "wikipedia": "陆游",
+    "note": ""
+  },
+  "文天祥": {
+    "dynasty": "南宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "文天祥传",
+        "ctext": "https://ctext.org/song-shi/wen-tian-xiang-zhuan/zh"
+      }
+    ],
+    "wikipedia": "文天祥",
+    "note": ""
+  },
+  "岳飞": {
+    "dynasty": "南宋",
+    "books": [
+      {
+        "book": "宋史",
+        "chapter": "岳飞传",
+        "ctext": "https://ctext.org/song-shi/yue-fei-zhuan/zh"
+      }
+    ],
+    "wikipedia": "岳飞",
+    "note": ""
+  },
+  "成吉思汗": {
+    "dynasty": "元朝",
+    "books": [
+      {
+        "book": "元史",
+        "chapter": "太祖本纪",
+        "ctext": "https://ctext.org/yuan-shi/tai-zu-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "成吉思汗",
+    "note": ""
+  },
+  "忽必烈": {
+    "dynasty": "元朝",
+    "books": [
+      {
+        "book": "元史",
+        "chapter": "世祖本纪",
+        "ctext": "https://ctext.org/yuan-shi/shi-zu-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "忽必烈",
+    "note": ""
+  },
+  "关汉卿": {
+    "dynasty": "元朝",
+    "books": [],
+    "wikipedia": "关汉卿",
+    "note": "正史无传（元史无关汉卿传），以维基与《录鬼簿》为主"
+  },
+  "朱元璋": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "太祖本纪",
+        "ctext": "https://ctext.org/ming-shi/tai-zu-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "朱元璋",
+    "note": ""
+  },
+  "朱棣": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "成祖本纪",
+        "ctext": "https://ctext.org/ming-shi/cheng-zu-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "明成祖",
+    "note": ""
+  },
+  "郑和": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "郑和传",
+        "ctext": "https://ctext.org/ming-shi/zheng-he-zhuan/zh"
+      }
+    ],
+    "wikipedia": "郑和",
+    "note": ""
+  },
+  "于谦": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "于谦传",
+        "ctext": "https://ctext.org/ming-shi/yu-qian-zhuan/zh"
+      }
+    ],
+    "wikipedia": "于谦",
+    "note": ""
+  },
+  "海瑞": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "海瑞传",
+        "ctext": "https://ctext.org/ming-shi/hai-rui-zhuan/zh"
+      }
+    ],
+    "wikipedia": "海瑞",
+    "note": ""
+  },
+  "戚继光": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "戚继光传",
+        "ctext": "https://ctext.org/ming-shi/qi-ji-guang-zhuan/zh"
+      }
+    ],
+    "wikipedia": "戚继光",
+    "note": ""
+  },
+  "李时珍": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "方伎传·李时珍",
+        "ctext": "https://ctext.org/ming-shi/fang-ji/zh"
+      }
+    ],
+    "wikipedia": "李时珍",
+    "note": ""
+  },
+  "徐霞客": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "徐霞客传",
+        "ctext": "https://ctext.org/ming-shi/xu-xia-ke-zhuan/zh"
+      }
+    ],
+    "wikipedia": "徐霞客",
+    "note": ""
+  },
+  "王阳明": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "王守仁传",
+        "ctext": "https://ctext.org/ming-shi/wang-shou-ren-zhuan/zh"
+      }
+    ],
+    "wikipedia": "王守仁",
+    "note": ""
+  },
+  "张居正": {
+    "dynasty": "明朝",
+    "books": [
+      {
+        "book": "明史",
+        "chapter": "张居正传",
+        "ctext": "https://ctext.org/ming-shi/zhang-ju-zheng-zhuan/zh"
+      }
+    ],
+    "wikipedia": "张居正",
+    "note": ""
+  },
+  "康熙": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "圣祖本纪",
+        "ctext": "https://ctext.org/qing-shi-gao/sheng-zu-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "康熙帝",
+    "note": "清史稿 ctext 收录待核，抓取失败则回退维基"
+  },
+  "雍正": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "世宗本纪",
+        "ctext": "https://ctext.org/qing-shi-gao/shi-zong-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "雍正帝",
+    "note": "同上"
+  },
+  "乾隆": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "高宗本纪",
+        "ctext": "https://ctext.org/qing-shi-gao/gao-zong-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "乾隆帝",
+    "note": "同上"
+  },
+  "纪晓岚": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "纪昀传",
+        "ctext": "https://ctext.org/qing-shi-gao/ji-yun-zhuan/zh"
+      }
+    ],
+    "wikipedia": "纪昀",
+    "note": "同上"
+  },
+  "和珅": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "和珅传",
+        "ctext": "https://ctext.org/qing-shi-gao/he-shen-zhuan/zh"
+      }
+    ],
+    "wikipedia": "和珅",
+    "note": "同上"
+  },
+  "林则徐": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "林则徐传",
+        "ctext": "https://ctext.org/qing-shi-gao/lin-ze-xu-zhuan/zh"
+      }
+    ],
+    "wikipedia": "林则徐",
+    "note": "同上"
+  },
+  "曾国藩": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "曾国藩传",
+        "ctext": "https://ctext.org/qing-shi-gao/zeng-guo-fan-zhuan/zh"
+      }
+    ],
+    "wikipedia": "曾国藩",
+    "note": "同上"
+  },
+  "左宗棠": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "左宗棠传",
+        "ctext": "https://ctext.org/qing-shi-gao/zuo-zong-tang-zhuan/zh"
+      }
+    ],
+    "wikipedia": "左宗棠",
+    "note": "同上"
+  },
+  "李鸿章": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "李鸿章传",
+        "ctext": "https://ctext.org/qing-shi-gao/li-hong-zhang-zhuan/zh"
+      }
+    ],
+    "wikipedia": "李鸿章",
+    "note": "同上"
+  },
+  "张之洞": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "张之洞传",
+        "ctext": "https://ctext.org/qing-shi-gao/zhang-zhi-dong-zhuan/zh"
+      }
+    ],
+    "wikipedia": "张之洞",
+    "note": "同上"
+  },
+  "曹雪芹": {
+    "dynasty": "清朝",
+    "books": [],
+    "wikipedia": "曹雪芹",
+    "note": "正史无传，以维基与红学资料为主"
+  },
+  "郑板桥": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "郑燮传",
+        "ctext": "https://ctext.org/qing-shi-gao/zheng-xie-zhuan/zh"
+      }
+    ],
+    "wikipedia": "郑板桥",
+    "note": "同上"
+  },
+  "慈禧": {
+    "dynasty": "清朝",
+    "books": [
+      {
+        "book": "清史稿",
+        "chapter": "后妃传·孝钦显皇后",
+        "ctext": "https://ctext.org/qing-shi-gao/hou-fei/zh"
+      }
+    ],
+    "wikipedia": "慈禧太后",
+    "note": "同上"
+  },
+  "李煜": {
+    "dynasty": "五代十国",
+    "books": [
+      {
+        "book": "新五代史",
+        "chapter": "南唐世家",
+        "ctext": "https://ctext.org/xin-wu-dai-shi/nan-tang-shi-jia/zh"
+      }
+    ],
+    "wikipedia": "李煜",
+    "note": ""
+  },
+  "柴荣": {
+    "dynasty": "五代十国",
+    "books": [
+      {
+        "book": "新五代史",
+        "chapter": "周本纪·世宗",
+        "ctext": "https://ctext.org/xin-wu-dai-shi/zhou-ben-ji/zh"
+      }
+    ],
+    "wikipedia": "周世宗",
+    "note": ""
+  },
+  "孙中山": {
+    "dynasty": "民国",
+    "books": [],
+    "wikipedia": "孙中山",
+    "note": "民国人物无古籍列传，以维基为主"
+  },
+  "鲁迅": {
+    "dynasty": "民国",
+    "books": [],
+    "wikipedia": "鲁迅",
+    "note": "同上"
+  },
+  "蔡元培": {
+    "dynasty": "民国",
+    "books": [],
+    "wikipedia": "蔡元培",
+    "note": "同上"
+  },
+  "梁启超": {
+    "dynasty": "民国",
+    "books": [],
+    "wikipedia": "梁启超",
+    "note": "同上"
+  }
+}

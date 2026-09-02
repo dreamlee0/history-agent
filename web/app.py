@@ -73,18 +73,32 @@ def _render_sources_html(sources: list) -> str:
     为什么需要：参考资料标题来自知识文件元数据，属外部输入；在
     unsafe_allow_html=True 下直出会构成存储型 XSS 面，故先 html.escape。
     URL 非空时渲染为带 rel=noopener 的新窗口链接，方便溯源跳转。
+
+    来源标注（数据源双轨）：真实史源显示 朝代·《书·篇卷》- 来源；persona
+    （内置摘要）附「（内置摘要）」。无书/篇时退回标题，与旧版一致。
     """
     parts = []
     for src in sources:
-        title = html_mod.escape(src.get("title", "未知"))
         url = src.get("url", "")
+        if src.get("doc_type") == "historical" and (src.get("book") or "").strip():
+            loc = src.get("book", "")
+            if (src.get("chapter") or "").strip():
+                loc += "·" + src.get("chapter", "")
+            dynasty = (src.get("dynasty") or "").strip()
+            prefix = f"{dynasty}·" if dynasty else ""
+            label = f"《{loc}》- {prefix}{src.get('source', '未知')}"
+        elif src.get("doc_type") == "historical":
+            label = src.get("source", "未知")
+        else:
+            label = f"{src.get('title', '未知')}（内置摘要）"
+        label = html_mod.escape(label)
         if url:
             url = html_mod.escape(url, quote=True)
             parts.append(
-                f'<a href="{url}" target="_blank" rel="noopener noreferrer">{title}</a>'
+                f'<a href="{url}" target="_blank" rel="noopener noreferrer">{label}</a>'
             )
         else:
-            parts.append(title)
+            parts.append(label)
     return "参考资料: " + " | ".join(parts)
 
 

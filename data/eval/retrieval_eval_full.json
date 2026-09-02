@@ -1,0 +1,1532 @@
+{
+  "_comment": "综合评测集（扩容版）：198 条，含 train/holdout 分层（seed=42）。expected=None 表示库外负面；expected=数组表示多相关题。",
+  "items": [
+    {
+      "type": "same",
+      "asker": "李白",
+      "expected": "李白",
+      "query": "你最著名的诗作《将进酒》的创作背景是怎样的",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "杜甫",
+      "expected": "杜甫",
+      "query": "你的《三吏》《三别》反映了怎样的时代背景",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "苏轼",
+      "expected": "苏轼",
+      "query": "介绍一下你的人生经历和代表词作",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "孔子",
+      "expected": "孔子",
+      "query": "你的核心思想仁与礼的关系是什么",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "岳飞",
+      "expected": "岳飞",
+      "query": "你抗击金军的主要事迹有哪些",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "秦始皇",
+      "expected": "秦始皇",
+      "query": "你统一六国后推行了哪些主要举措",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "王阳明",
+      "expected": "王阳明",
+      "query": "你的心学核心主张是什么",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "武则天",
+      "expected": "武则天",
+      "query": "你作为中国历史上唯一的女皇帝的主要政绩",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "康熙",
+      "expected": "康熙",
+      "query": "你平定三藩之乱的过程是怎样的",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "郑和",
+      "expected": "郑和",
+      "query": "你七下西洋的航线与意义",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "林则徐",
+      "expected": "林则徐",
+      "query": "虎门销烟的背景和影响",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "唐太宗",
+      "expected": "唐太宗",
+      "query": "你开创贞观之治的主要措施",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "屈原",
+      "expected": "屈原",
+      "query": "你的《离骚》与楚辞的关系",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "徐霞客",
+      "expected": "徐霞客",
+      "query": "你游历考察的主要贡献是什么",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "曹操",
+      "expected": "曹操",
+      "query": "官渡之战的具体经过是怎样的",
+      "split": "holdout"
+    },
+    {
+      "type": "event",
+      "asker": "诸葛亮",
+      "expected": "诸葛亮",
+      "query": "赤壁之战的经过与各方角色",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "李白",
+      "expected": "杜甫",
+      "query": "介绍一下杜甫的生平和诗歌成就",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "苏轼",
+      "expected": "陆游",
+      "query": "陆游的爱国诗作有什么特点",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "孔子",
+      "expected": "老子",
+      "query": "介绍一下老子的道家思想",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "岳飞",
+      "expected": "韩信",
+      "query": "介绍一下韩信的军事才能",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "隋文帝",
+      "expected": "隋炀帝",
+      "query": "开凿大运河的经过和影响",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "曹操",
+      "expected": "刘备",
+      "query": "刘备的仁德形象与蜀汉的建立",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "武则天",
+      "expected": "唐太宗",
+      "query": "介绍一下唐太宗的贞观之治",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "苏轼",
+      "expected": "王维",
+      "query": "王维的诗中有画指的是什么",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "诸葛亮",
+      "expected": "孙武",
+      "query": "孙武的《孙子兵法》核心军事思想是什么",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "唐太宗",
+      "expected": "玄奘",
+      "query": "介绍一下玄奘西行取经的事迹",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "鲁迅",
+      "expected": null,
+      "query": "钱学森为中国航天事业做出了哪些贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "鲁迅",
+      "expected": null,
+      "query": "袁隆平在杂交水稻领域的成就",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "鲁迅",
+      "expected": null,
+      "query": "屠呦呦发现青蒿素的过程",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "唐太宗",
+      "expected": null,
+      "query": "钟南山在抗击非典中的贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "诸葛亮",
+      "expected": null,
+      "query": "拿破仑的军事才能与法兰西帝国的建立",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "诸葛亮",
+      "expected": null,
+      "query": "华盛顿在美国独立战争中的角色",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "诸葛亮",
+      "expected": "曹操",
+      "query": "曹操的军事谋略与用人之道",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "李白",
+      "expected": "苏轼",
+      "query": "苏轼最著名的词作是哪些",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "杜甫",
+      "expected": "白居易",
+      "query": "白居易的诗歌风格特点",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "辛弃疾",
+      "expected": "苏轼",
+      "query": "苏轼的豪放词风特点是什么",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "屈原",
+      "expected": "陶渊明",
+      "query": "陶渊明的田园诗风格",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "韩信",
+      "expected": "白起",
+      "query": "白起的军事战绩",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "苏轼",
+      "expected": [
+        "欧阳修",
+        "王安石",
+        "苏轼"
+      ],
+      "query": "唐宋八大家中哪些是宋代人",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "曹操",
+      "expected": [
+        "曹操",
+        "孙权",
+        "刘备",
+        "诸葛亮",
+        "周瑜"
+      ],
+      "query": "赤壁之战涉及哪些主要人物",
+      "split": "holdout"
+    },
+    {
+      "type": "multi",
+      "asker": "白居易",
+      "expected": [
+        "李白",
+        "杜甫",
+        "王维",
+        "李商隐",
+        "杜牧"
+      ],
+      "query": "唐代有哪些著名诗人",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "刘邦",
+      "expected": [
+        "张良",
+        "萧何",
+        "韩信"
+      ],
+      "query": "汉朝的开国功臣有哪些",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "秦始皇",
+      "expected": [
+        "秦始皇",
+        "李斯",
+        "蒙恬"
+      ],
+      "query": "秦朝有哪些重要历史人物",
+      "split": "holdout"
+    },
+    {
+      "type": "multi",
+      "asker": "诸葛亮",
+      "expected": [
+        "曹操",
+        "刘备",
+        "孙权",
+        "关羽",
+        "张飞",
+        "赵云",
+        "周瑜"
+      ],
+      "query": "三国时期的主要人物有哪些",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "屈原",
+      "expected": "屈原",
+      "query": "介绍一下你的楚辞",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "白起",
+      "expected": "白起",
+      "query": "介绍一下你的长平之战",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "商鞅",
+      "expected": "商鞅",
+      "query": "介绍一下你的商鞅变法",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "蔺相如",
+      "expected": "蔺相如",
+      "query": "介绍一下你的完璧归赵",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "蔡元培",
+      "expected": "蔡元培",
+      "query": "介绍一下你的北京大学",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "鲁迅",
+      "expected": "鲁迅",
+      "query": "介绍一下你的新文化运动",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "孙中山",
+      "expected": "孙中山",
+      "query": "介绍一下你的辛亥革命",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "梁启超",
+      "expected": "梁启超",
+      "query": "介绍一下你的戊戌变法",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "商汤",
+      "expected": "商汤",
+      "query": "介绍一下你的商汤伐桀",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "岳飞",
+      "expected": "岳飞",
+      "query": "介绍一下你的抗金战争",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "辛弃疾",
+      "expected": "辛弃疾",
+      "query": "介绍一下你的豪放词派",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "文天祥",
+      "expected": "文天祥",
+      "query": "介绍一下你的抗元斗争",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "陆游",
+      "expected": "陆游",
+      "query": "介绍一下你的爱国诗词",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "韩愈",
+      "expected": "韩愈",
+      "query": "介绍一下你的古文运动",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "李商隐",
+      "expected": "李商隐",
+      "query": "介绍一下你的无题诗",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "杜甫",
+      "expected": "杜甫",
+      "query": "介绍一下你的安史之乱",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "玄奘",
+      "expected": "玄奘",
+      "query": "介绍一下你的西行取经",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "杜牧",
+      "expected": "杜牧",
+      "query": "介绍一下你的晚唐诗歌",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "武则天",
+      "expected": "武则天",
+      "query": "介绍一下你的女皇登基",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "唐太宗",
+      "expected": "唐太宗",
+      "query": "介绍一下你的贞观之治",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "颜真卿",
+      "expected": "颜真卿",
+      "query": "介绍一下你的颜体书法",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "王维",
+      "expected": "王维",
+      "query": "介绍一下你的山水田园诗",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "白居易",
+      "expected": "白居易",
+      "query": "介绍一下你的新乐府运动",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "李白",
+      "expected": "李白",
+      "query": "介绍一下你的唐诗创作",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "霍去病",
+      "expected": "霍去病",
+      "query": "介绍一下你的封狼居胥",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "卫青",
+      "expected": "卫青",
+      "query": "介绍一下你的七击匈奴",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "韩信",
+      "expected": "韩信",
+      "query": "介绍一下你的胯下之辱",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "张良",
+      "expected": "张良",
+      "query": "介绍一下你的博浪沙刺秦",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "汉武帝",
+      "expected": "汉武帝",
+      "query": "介绍一下你的北击匈奴",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "萧何",
+      "expected": "萧何",
+      "query": "介绍一下你的月下追韩信",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "刘邦",
+      "expected": "刘邦",
+      "query": "介绍一下你的斩蛇起义",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "张骞",
+      "expected": "张骞",
+      "query": "介绍一下你的出使西域",
+      "split": "holdout"
+    },
+    {
+      "type": "same",
+      "asker": "司马迁",
+      "expected": "司马迁",
+      "query": "介绍一下你的《史记》著作",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "李鸿章",
+      "expected": "李鸿章",
+      "query": "介绍一下你的淮军创建",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "左宗棠",
+      "expected": "左宗棠",
+      "query": "介绍一下你的收复新疆",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "和珅",
+      "expected": "和珅",
+      "query": "介绍一下你的深得宠信",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "林则徐",
+      "expected": "林则徐",
+      "query": "介绍一下你的虎门销烟",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "曾国藩",
+      "expected": "曾国藩",
+      "query": "介绍一下你的湘军创建",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "乾隆",
+      "expected": "乾隆",
+      "query": "介绍一下你的十全武功",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "郑板桥",
+      "expected": "郑板桥",
+      "query": "介绍一下你的扬州八怪",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "康熙",
+      "expected": "康熙",
+      "query": "介绍一下你的平定三藩",
+      "split": "train"
+    },
+    {
+      "type": "same",
+      "asker": "张之洞",
+      "expected": "张之洞",
+      "query": "介绍一下你的洋务运动",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "朱棣",
+      "expected": "文天祥",
+      "query": "介绍一下文天祥的过零丁洋",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "孙权",
+      "expected": "李白",
+      "query": "介绍一下李白的翰林供奉",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "隋炀帝",
+      "expected": "黄帝",
+      "query": "介绍一下黄帝的涿鹿之战",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "张之洞",
+      "expected": "赵云",
+      "query": "介绍一下赵云的长坂坡救主",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "王羲之",
+      "expected": "林则徐",
+      "query": "介绍一下林则徐的师夷长技",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "隋炀帝",
+      "expected": "关羽",
+      "query": "介绍一下关羽的水淹七军",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "范蠡",
+      "expected": "关羽",
+      "query": "介绍一下关羽的过五关斩六将",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "陆游",
+      "expected": "商汤",
+      "query": "介绍一下商汤的任用伊尹",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "曹操",
+      "expected": "朱棣",
+      "query": "介绍一下朱棣的永乐大典",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "王羲之",
+      "expected": "岳飞",
+      "query": "介绍一下岳飞的风波亭冤案",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "王阳明",
+      "expected": "姜子牙",
+      "query": "介绍一下姜子牙的渭水垂钓",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "孙中山",
+      "expected": "诸葛亮",
+      "query": "介绍一下诸葛亮的六出祁山",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "文天祥",
+      "expected": "舜",
+      "query": "介绍一下舜的任用贤能",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "萧何",
+      "expected": "柴荣",
+      "query": "介绍一下柴荣的柴荣北伐",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "赵云",
+      "expected": "商汤",
+      "query": "介绍一下商汤的网开三面",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "刘邦",
+      "expected": "忽必烈",
+      "query": "介绍一下忽必烈的统一中国",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "范蠡",
+      "expected": "蔡元培",
+      "query": "介绍一下蔡元培的新文化运动",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "郑板桥",
+      "expected": "李斯",
+      "query": "介绍一下李斯的法家思想",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "杜甫",
+      "expected": "司马懿",
+      "query": "介绍一下司马懿的隐忍待机",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "隋文帝",
+      "expected": "尧",
+      "query": "介绍一下尧的制定历法",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "颜真卿",
+      "expected": "陶渊明",
+      "query": "介绍一下陶渊明的桃花源记",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "辛弃疾",
+      "expected": "刘邦",
+      "query": "介绍一下刘邦的斩蛇起义",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "李煜",
+      "expected": "禹",
+      "query": "介绍一下禹的划定九州",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "陶渊明",
+      "expected": "商鞅",
+      "query": "介绍一下商鞅的徙木立信",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "孔子",
+      "expected": "陆游",
+      "query": "介绍一下陆游的抗金主张",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "赵匡胤",
+      "expected": "商鞅",
+      "query": "介绍一下商鞅的军功爵制",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "卫青",
+      "expected": "王羲之",
+      "query": "介绍一下王羲之的书法艺术",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "杜甫",
+      "expected": "柴荣",
+      "query": "介绍一下柴荣的五代十国",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "墨子",
+      "expected": "秦始皇",
+      "query": "介绍一下秦始皇的中央集权",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "司马懿",
+      "expected": "孙权",
+      "query": "介绍一下孙权的赤壁之战",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "商汤",
+      "expected": "李斯",
+      "query": "介绍一下李斯的废分封行郡县",
+      "split": "holdout"
+    },
+    {
+      "type": "cross",
+      "asker": "王维",
+      "expected": "秦始皇",
+      "query": "介绍一下秦始皇的焚书坑儒",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "蒙恬",
+      "expected": "于谦",
+      "query": "介绍一下于谦的击退瓦剌",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "司马懿",
+      "expected": "舜",
+      "query": "介绍一下舜的治理天下",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "辛弃疾",
+      "expected": "诸葛亮",
+      "query": "介绍一下诸葛亮的木牛流马",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "商汤",
+      "expected": "蔡元培",
+      "query": "介绍一下蔡元培的北京大学",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "关汉卿",
+      "expected": "和珅",
+      "query": "介绍一下和珅的被赐自尽",
+      "split": "train"
+    },
+    {
+      "type": "cross",
+      "asker": "周瑜",
+      "expected": "秦始皇",
+      "query": "介绍一下秦始皇的郡县制",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "苏轼",
+      "expected": "辛弃疾",
+      "query": "辛弃疾的豪放词风和苏轼相比有什么异同",
+      "split": "holdout"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "白居易",
+      "expected": "杜甫",
+      "query": "杜甫诗作的现实主义风格体现在哪些方面",
+      "split": "holdout"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "王维",
+      "expected": "李白",
+      "query": "李白的浪漫主义诗风有哪些突出特点",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "关羽",
+      "expected": "张飞",
+      "query": "张飞的性格特点和主要战绩有哪些",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "张飞",
+      "expected": "赵云",
+      "query": "赵云在长坂坡救阿斗的事迹经过如何",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "周瑜",
+      "expected": "诸葛亮",
+      "query": "诸葛亮在东吴舌战群儒的故事是怎样的",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "卫青",
+      "expected": "霍去病",
+      "query": "霍去病封狼居胥的战绩经过如何",
+      "split": "holdout"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "张良",
+      "expected": "韩信",
+      "query": "韩信的背水一战战术是怎么回事",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "欧阳修",
+      "expected": "苏轼",
+      "query": "苏轼的文学成就主要有哪些方面",
+      "split": "holdout"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "王安石",
+      "expected": "司马光",
+      "query": "司马光编纂《资治通鉴》的经过和体例",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "李商隐",
+      "expected": "杜牧",
+      "query": "杜牧咏史怀古诗的风格特点是什么",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "颜真卿",
+      "expected": "王羲之",
+      "query": "王羲之《兰亭集序》的书法地位与价值",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "曾国藩",
+      "expected": "左宗棠",
+      "query": "左宗棠收复新疆的经过和意义",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "左宗棠",
+      "expected": "李鸿章",
+      "query": "李鸿章在洋务运动中的主要作为有哪些",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "康熙",
+      "expected": "雍正",
+      "query": "雍正皇帝推行摊丁入亩的主要内容是什么",
+      "split": "holdout"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "雍正",
+      "expected": "乾隆",
+      "query": "乾隆盛世的主要成就表现在哪些方面",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "杜甫",
+      "expected": "李白",
+      "query": "李白游历名山大川的经历与诗作",
+      "split": "train"
+    },
+    {
+      "type": "cross_trap",
+      "asker": "诸葛亮",
+      "expected": "周瑜",
+      "query": "周瑜在赤壁之战中的关键作用是什么",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "林则徐",
+      "expected": "林则徐",
+      "query": "你主持的虎门销烟，当时销毁了多少鸦片，采取了哪些措施",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "王安石",
+      "expected": "王安石",
+      "query": "你发起的熙宁变法主要内容有哪些，为什么阻力很大",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "范仲淹",
+      "expected": "范仲淹",
+      "query": "你主导的庆历新政涉及哪些方面，为何未能持续推行",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "梁启超",
+      "expected": "梁启超",
+      "query": "你参与推动的戊戌变法的核心主张和结局是什么",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "孙中山",
+      "expected": "孙中山",
+      "query": "你领导的辛亥革命取得了哪些成果，三民主义的内涵是什么",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "鲁迅",
+      "expected": "鲁迅",
+      "query": "你参与的新文化运动批判了什么，提倡了什么",
+      "split": "holdout"
+    },
+    {
+      "type": "event",
+      "asker": "刘邦",
+      "expected": "刘邦",
+      "query": "你与项羽的楚汉之争经过了哪些关键战役",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "玄奘",
+      "expected": "玄奘",
+      "query": "你西行取经的路线和带回的经书情况如何",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "张骞",
+      "expected": "张骞",
+      "query": "你两次出使西域的经过和意义是什么",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "卫青",
+      "expected": "卫青",
+      "query": "你率军北击匈奴的几次大战经过如何",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "霍去病",
+      "expected": "霍去病",
+      "query": "你漠北之战大破匈奴的经过是怎样的",
+      "split": "holdout"
+    },
+    {
+      "type": "event",
+      "asker": "戚继光",
+      "expected": "戚继光",
+      "query": "你在东南沿海抗倭的主要战绩有哪些",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "文天祥",
+      "expected": "文天祥",
+      "query": "你在崖山海战前后的抗元事迹和结局如何",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "岳飞",
+      "expected": "岳飞",
+      "query": "你率岳家军北伐的主要战事与最终结局",
+      "split": "train"
+    },
+    {
+      "type": "event",
+      "asker": "李时珍",
+      "expected": "李时珍",
+      "query": "你编写《本草纲目》的经历和贡献是什么",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "周瑜",
+      "expected": null,
+      "query": "爱因斯坦有哪些主要成就和贡献",
+      "split": "holdout"
+    },
+    {
+      "type": "negative",
+      "asker": "张良",
+      "expected": null,
+      "query": "王昭君有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "尧",
+      "expected": null,
+      "query": "爱迪生有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "尧",
+      "expected": null,
+      "query": "金庸有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "禹",
+      "expected": null,
+      "query": "西施有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "武则天",
+      "expected": null,
+      "query": "甘地有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "商鞅",
+      "expected": null,
+      "query": "张爱玲有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "柴荣",
+      "expected": null,
+      "query": "罗斯福有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "孙武",
+      "expected": null,
+      "query": "袁隆平有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "忽必烈",
+      "expected": null,
+      "query": "特斯拉有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "海瑞",
+      "expected": null,
+      "query": "莫扎特有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "张良",
+      "expected": null,
+      "query": "勾践有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "司马迁",
+      "expected": null,
+      "query": "钟南山有哪些主要成就和贡献",
+      "split": "holdout"
+    },
+    {
+      "type": "negative",
+      "asker": "欧阳修",
+      "expected": null,
+      "query": "郑成功有哪些主要成就和贡献",
+      "split": "train"
+    },
+    {
+      "type": "negative",
+      "asker": "纪晓岚",
+      "expected": null,
+      "query": "哥伦布有哪些主要成就和贡献",
+      "split": "holdout"
+    },
+    {
+      "type": "negative",
+      "asker": "周武王",
+      "expected": null,
+      "query": "贝多芬有哪些主要成就和贡献",
+      "split": "holdout"
+    },
+    {
+      "type": "multi",
+      "asker": "李白",
+      "expected": [
+        "李白",
+        "杜甫",
+        "白居易",
+        "王维",
+        "李商隐",
+        "杜牧"
+      ],
+      "query": "唐朝有哪些著名的诗人",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "苏轼",
+      "expected": [
+        "欧阳修",
+        "苏轼",
+        "王安石",
+        "司马光",
+        "范仲淹"
+      ],
+      "query": "北宋有哪些著名的文学家",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "曹操",
+      "expected": [
+        "刘备",
+        "关羽",
+        "张飞",
+        "赵云",
+        "诸葛亮"
+      ],
+      "query": "三国时期蜀汉有哪些主要人物",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "诸葛亮",
+      "expected": [
+        "曹操",
+        "司马懿"
+      ],
+      "query": "三国时期曹魏有哪些重要人物",
+      "split": "holdout"
+    },
+    {
+      "type": "multi",
+      "asker": "孙权",
+      "expected": [
+        "孙权",
+        "周瑜"
+      ],
+      "query": "三国时期东吴有哪些主要人物",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "孔子",
+      "expected": [
+        "老子",
+        "孔子",
+        "墨子",
+        "孙武"
+      ],
+      "query": "春秋战国时期有哪些重要的思想家",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "刘邦",
+      "expected": [
+        "卫青",
+        "霍去病",
+        "韩信"
+      ],
+      "query": "西汉时期有哪些著名的将领",
+      "split": "holdout"
+    },
+    {
+      "type": "multi",
+      "asker": "辛弃疾",
+      "expected": [
+        "岳飞",
+        "辛弃疾",
+        "陆游"
+      ],
+      "query": "南宋有哪些抗击金国的重要人物",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "于谦",
+      "expected": [
+        "于谦",
+        "海瑞",
+        "王阳明",
+        "张居正"
+      ],
+      "query": "明朝有哪些著名的文臣",
+      "split": "holdout"
+    },
+    {
+      "type": "multi",
+      "asker": "康熙",
+      "expected": [
+        "康熙",
+        "雍正",
+        "乾隆"
+      ],
+      "query": "清朝有哪些重要的皇帝",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "纪晓岚",
+      "expected": [
+        "纪晓岚",
+        "和珅",
+        "林则徐",
+        "曾国藩",
+        "左宗棠",
+        "李鸿章",
+        "张之洞"
+      ],
+      "query": "清朝有哪些著名的臣子",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "孙中山",
+      "expected": [
+        "孙中山",
+        "鲁迅",
+        "蔡元培",
+        "梁启超"
+      ],
+      "query": "民国时期有哪些重要的思想家和文学家",
+      "split": "holdout"
+    },
+    {
+      "type": "multi",
+      "asker": "成吉思汗",
+      "expected": [
+        "成吉思汗",
+        "忽必烈",
+        "关汉卿"
+      ],
+      "query": "元朝有哪些重要人物",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "王羲之",
+      "expected": [
+        "王羲之",
+        "陶渊明"
+      ],
+      "query": "东晋有哪些著名的文化名人",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "隋文帝",
+      "expected": [
+        "隋文帝",
+        "隋炀帝"
+      ],
+      "query": "隋朝有哪些重要的皇帝",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "曾国藩",
+      "expected": [
+        "曾国藩",
+        "左宗棠",
+        "李鸿章",
+        "张之洞"
+      ],
+      "query": "晚清洋务派有哪些代表人物",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "刘备",
+      "expected": [
+        "曹操",
+        "刘备",
+        "孙权"
+      ],
+      "query": "东汉末年至三国有哪些重要的割据领袖",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "李煜",
+      "expected": [
+        "李煜",
+        "柴荣"
+      ],
+      "query": "五代十国时期有哪些重要的君主",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "商汤",
+      "expected": [
+        "商汤",
+        "周文王",
+        "周武王",
+        "周公",
+        "姜子牙"
+      ],
+      "query": "商周时期有哪些重要的人物",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "朱元璋",
+      "expected": [
+        "朱元璋",
+        "朱棣"
+      ],
+      "query": "明朝前期有哪些重要的皇帝",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "武则天",
+      "expected": [
+        "武则天",
+        "慈禧"
+      ],
+      "query": "中国古代有哪些掌握大权的女性统治者",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "李时珍",
+      "expected": [
+        "李时珍",
+        "徐霞客"
+      ],
+      "query": "明朝有哪些著名的科学家",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "郑和",
+      "expected": [
+        "郑和",
+        "徐霞客"
+      ],
+      "query": "明朝有哪些著名的航海家和地理学家",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "霍去病",
+      "expected": [
+        "卫青",
+        "霍去病"
+      ],
+      "query": "汉武帝时期有哪些抗击匈奴的名将",
+      "split": "train"
+    },
+    {
+      "type": "multi",
+      "asker": "诸葛亮",
+      "expected": [
+        "曹操",
+        "刘备",
+        "孙权",
+        "诸葛亮",
+        "周瑜"
+      ],
+      "query": "赤壁之战中有哪些主要人物",
+      "split": "train"
+    }
+  ]
+}

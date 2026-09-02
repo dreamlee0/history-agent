@@ -4,7 +4,7 @@
 
 | 版本 | 说明 |
 |------|------|
-| 文档状态 | 2026-08-14 依据当前代码库编写 |
+| 文档状态 | 2026-09-02 依据当前代码库更新（数据源升级 + 精确检索确定性修复后） |
 | 代码位置 | `/home/tjut_lixiang/web-learning/agent/agent-make` |
 | 项目性质 | 学习复现 + 工程化改造的完整 Agent 项目（fork 自 `dreamlee0/history-rag-chat`） |
 
@@ -26,11 +26,16 @@
 ## 二、核心功能
 
 ### 2.1 角色扮演
-- **97 位历史人物**，覆盖上古、商、周、春秋战国、秦汉、三国、唐、宋、元、明、清、民国等 **20 个朝代**；
+- **97 位历史人物**，覆盖上古、商、周、春秋战国、秦汉、三国、唐、宋、元、明、清、民国等 **21 个朝代**（三国拆蜀汉/东吴/曹魏）；
 - 每位人物由独立的 YAML 档案定义（身份、生卒年、性格、说话风格、知识领域、名言），系统提示词据此生成，人物口吻与时代感真实还原。
 
 ### 2.2 RAG 知识增强与溯源
-- 内置 **99 篇史料文档**（97 篇人物传记 + 官渡之战、赤壁之战 2 篇事件史料），由本地向量库检索增强生成；
+- **双轨史料库（206 文件）**：99 篇 persona（内置摘要，仅风格参考非权威）+ **107 篇真实史源**
+  （74 篇古诗文网古籍原文 + 5 篇 ctext 手写节选样例 + **21 篇百度百科** + 7 篇 A 类重抓），
+  **97/97 人均有 historical 文件**；带 朝代·书·篇卷 标注，由本地向量库检索增强生成；
+  真实史源优先、persona 补位，`PERSONA_FALLBACK=off` 可完全移出 persona（详见 DATA_SOURCES.md）；
+- **多人物联合检索**（五大问题整改）：点名 ≥2 人或枚举题走 multi 分支（`$in` 联合池 + 容量放大到
+  `MULTI_TOP_K=7`），多相关枚举 Recall@7 0.178 → 0.745（详见 RAG_EVALUATION_REPORT_FULL.md §14）；
 - 每条回答末尾自动标注【参考史料】，支持**知识溯源**；
 - 检索采用"按人物过滤优先 + 全局兜底"策略，避免跨人物史料污染（详见 4.3）。
 
@@ -53,7 +58,8 @@
 - 提供史料**爬虫**（`crawl_knowledge.py`，项目唯一爬虫）、**知识生成**（`generate_knowledge.py`）与**向量库构建**（`build_vector_db.py`）脚本，支持知识库扩展。
 
 ### 2.8 工程化与测试
-- 22 个 pytest 用例（人物加载、知识库完整性、RAG 检索防污染、防幻觉提示词、记忆隔离等）；
+- **96 个 pytest 用例**（人物加载、知识库完整性、RAG 检索防污染、防幻觉提示词、记忆隔离、
+  双轨数据源、多格式文档解析、抓取器、端到端引用校验等）；
 - Dev Container + Streamlit Cloud 部署支持。
 
 ---
@@ -170,10 +176,13 @@ agent-make/
 │   └── settings.py            # pydantic-settings 配置（LLM/Embedding/向量库/DB）
 ├── data/
 │   ├── characters/            # 97 位历史人物配置（按朝代分目录，YAML）
-│   ├── knowledge/             # 史料知识库（99 篇：97 传记 + 2 事件）
-│   │   ├── biography_*.txt    # 人物传记（头部含 来源/分类/人物 元数据）
-│   │   ├── event_*.txt        # 事件史料
-│   │   └── crawl_cache.json   # 爬虫缓存
+│   ├── knowledge/             # 史料知识库（双轨：99 persona + 107 真实史源，多格式）
+│   │   ├── biography_*_内置.txt      # persona 内置摘要（非权威，风格参考）
+│   │   ├── biography_*_gushiwen_*.txt # 真实史源：古诗文网古籍原文（historical，主源）
+│   │   ├── biography_*_百度百科.txt   # 真实史源：百度百科（historical，三手资料如实标注）
+│   │   ├── biography_*_ctext_*.txt    # 真实史源：ctext 手写节选样例
+│   │   ├── event_*_内置.txt     # 事件摘要（赤壁之战、官渡之战）
+│   │   └── (crawl_cache.json 在 data/sources/，非知识目录——防被当 JSON 知识摄入)
 │   ├── vector_db/             # Chroma 向量数据库（已构建并提交）
 │   └── history_chat.db        # SQLite 对话库（运行生成）
 ├── scripts/                   # 工具脚本
@@ -190,7 +199,7 @@ agent-make/
 │   ├── app.py                 # Streamlit 主应用（Secrets 桥接/界面/会话）
 │   ├── styles.py              # 水墨丹青 CSS
 │   └── export_utils.py        # Markdown/PDF 导出
-├── tests/                     # 22 个 pytest 用例（5 个测试模块）
+├── tests/                     # 96 个 pytest 用例（13 个测试模块）
 ├── images/                    # 项目截图
 ├── .devcontainer/             # Dev Container 开发环境
 ├── .streamlit/config.toml     # Streamlit 服务器配置
@@ -205,9 +214,9 @@ agent-make/
 
 | 数据 | 数量 | 说明 |
 |------|------|------|
-| 历史人物 | 97 位 | 覆盖 20 个朝代，每人一个 YAML 档案 |
-| 史料文档 | 99 篇 | 97 篇人物传记 + 2 篇事件史料（官渡、赤壁） |
-| 向量库块数 | 按文本分割自动生成 | 500 字/块、100 字重叠，中文标点分隔 |
+| 历史人物 | 97 位 | 覆盖 21 个朝代，每人一个 YAML 档案 |
+| 史料文档 | 206 文件 | 99 篇 persona 内置摘要 + 107 篇真实史源（74 gushiwen 古籍原文 + 5 ctext 样例 + 21 百度百科 + 7 A 类重抓），97/97 人全覆盖 |
+| 向量库块数 | 1357 块 | persona 99 + historical 1258（gushiwen 965 + 百度百科 288 + ctext 5），500 字/块、100 字重叠，中文标点分隔 |
 | 数据库表 | 2 张 | `conversations`（会话）+ `messages`（消息，含 sources_json 溯源） |
 
 史料文档头部约定元数据格式（`load_knowledge_files` 解析）：
@@ -261,14 +270,20 @@ streamlit run web/app.py
 
 ## 八、测试
 
-22 个用例，覆盖 5 个维度：
+**96 个用例**，覆盖 13 个测试模块：
 
 | 模块 | 覆盖内容 |
 |------|----------|
 | `test_characters.py` | 人物加载、必填字段、朝代顺序、人物与知识文件一一对应、重名检查 |
 | `test_knowledge.py` | 知识文件加载、元数据完整性、史实正确性抽查（如隋文帝无大运河、隋炀帝有大运河） |
-| `test_retrieval.py` | 同人检索保持人物聚焦、跨人检索退回全局、**不注入当事人传记**、人物自有知识可检索 |
-| `test_memory.py` | 复合键含人物、同人物跨会话隔离、复合键清空 |
+| `test_retrieval.py` | 同人检索保持人物聚焦、跨人检索退回全局、**不注入当事人传记**、库外拒绝、确定性精确检索 |
+| `test_character_sources.py` | 97 人映射表完整性（朝代/书/篇/维基条目） |
+| `test_document_loader.py` | 多格式（txt/md/html/pdf/docx/xml/json/csv/tsv/xlsx）解析、doc_type 双轨判定、朝代/书/篇透传 |
+| `test_crawler.py` | ctext/gushiwen/维基 抓取器解析与去重、`--sources all`→gushiwen+wiki、front-matter 产出 |
+| `test_e2e.py` | 端到端：跨人物路由到全局、引用 grounding、bad-cite 丢弃 |
+| `test_citation.py` | 引用索引校验、越界丢弃 |
+| `test_bm25.py` | BM25 词法索引/人物过滤 |
+| `test_db.py` / `test_memory.py` | SQLite 持久化 / 复合键隔离、跨会话隔离 |
 | `test_agent_prompt.py` | 防幻觉规则存在、引用限于检索来源、无 RAG 分支禁止编造、角色与事实平衡 |
 
 ```bash
@@ -282,8 +297,13 @@ pytest tests/ -v
 ## 九、局限与展望
 
 **当前局限**
-- 知识库为内置百科式传记，深度有限（每篇人物约 1~2 千字），对冷门细节覆盖不足；
-- 人物配置（97 位）与知识文档（99 篇）由脚本/内置数据生成，尚未覆盖全部正史细节；
+- 真实史源 **107 篇**（gushiwen 古籍原文 + ctext 样例 + **21 篇百度百科**）已入库，
+  **97/97 人均有 historical 文件**（五大问题整改·阶段1 完成，原 28 人 persona 兜底已清零）；
+- 百度百科为**三手资料**（非正史原文，权威性低于古籍原文），如实标注、仅作引用溯源；
+  中文维基百科暂未入库（本环境不可达），网络恢复后可由 `--sources wiki` 补抓；
+- 生成层在线评测（DeepSeek-v4-flash）：Faithfulness 0.227 / Answer Relevancy 0.570 /
+  Citation Accuracy 0.740——低忠实度主要反映语料覆盖缺口（部分枚举题检索只命中
+  1-2 人、库外 no-RAG 回答记 0 分），非评测假象；
 - LLM 依赖外部 API（需联网），本地仅 Embedding 离线。
 
 **可扩展方向**
