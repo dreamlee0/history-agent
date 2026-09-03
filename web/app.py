@@ -12,14 +12,33 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import streamlit as st
 
+# set_page_config 必须是脚本的第一条 Streamlit 命令：放在最顶部。
+# 原因：下方 st.secrets 桥接在本地无 secrets.toml 时会先 st.error 入队一个
+# delta，若 set_page_config 在其之后调用会抛 "can only be called once"
+# （Streamlit 1.32 的 _set_page_config_allowed 只在每次 run 的 reset 时重置）。
+st.set_page_config(
+    page_title="历史人物对话 · 水墨丹青",
+    page_icon="📜",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
 # 将 Streamlit Secrets 桥接到环境变量，供 pydantic-settings 读取
 # (.env 不会部署到云端，密钥需配在 Streamlit Cloud 的 Secrets 中)
-try:
-    for _k in ("LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL", "EMBEDDING_MODEL", "HF_ENDPOINT"):
-        if _k in st.secrets:
-            os.environ.setdefault(_k, str(st.secrets[_k]))
-except Exception:
-    pass
+# 注意：Streamlit 1.32 在本地无 secrets.toml 时，访问 st.secrets 会先入队一个
+# st.error 警报——即使外层 try/except 吞掉异常也拦不住渲染，导致欢迎页顶部
+# 出现红条并泄漏本地绝对路径。故先探测 secrets.toml 是否存在，不存在则跳过。
+_secrets_candidates = [
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".streamlit", "secrets.toml"),
+    os.path.join(os.path.expanduser("~"), ".streamlit", "secrets.toml"),
+]
+if any(os.path.exists(p) for p in _secrets_candidates):
+    try:
+        for _k in ("LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL", "EMBEDDING_MODEL", "HF_ENDPOINT"):
+            if _k in st.secrets:
+                os.environ.setdefault(_k, str(st.secrets[_k]))
+    except Exception:
+        pass
 
 from src.characters import character_manager
 from src.agents import AgentManager
@@ -67,39 +86,67 @@ def get_session_id():
     return st.session_state.session_id
 
 
+def _format_time(ts: str) -> str:
+    """把 SQLite 时间戳（YYYY-MM-DD HH:MM:SS）压缩为 MM-DD HH:MM 展示。"""
+    if not ts:
+        return ""
+    return ts[:16][5:] if len(ts) >= 16 else ts[:10]
+
+
+def _source_parts(src: dict) -> tuple:
+    """把一条来源拆成 (标题文本, 元信息文本, url)。
+
+    数据源双轨：真实史源 → 标题取 source，元信息为 朝代·《书·篇卷》；
+    persona（内置摘要）→ 标题取 title，元信息为「内置摘要」。
+    无书/篇时退回 source，与旧版一致。
+    """
+    url = src.get("url", "")
+    if src.get("doc_type") == "historical":
+        book = (src.get("book") or "").strip()
+        chapter = (src.get("chapter") or "").strip()
+        dynasty = (src.get("dynasty") or "").strip()
+        source = (src.get("source") or "未知").strip()
+        if book:
+            loc = f"《{book}"
+            if chapter:
+                loc += f"·{chapter}"
+            loc += "》"
+            attr = f"{dynasty}·{loc}" if dynasty else loc
+        else:
+            attr = ""
+        return source, attr, url
+    return (src.get("title") or "未知").strip(), "内置摘要", url
+
+
 def _render_sources_html(sources: list) -> str:
-    """把来源列表渲染成一行 HTML（标题已转义防 XSS，URL 生成可点击链接）。
+    """把来源列表渲染成结构化溯源条目（.src-item 行，配合「参考史料」折叠面板）。
 
     为什么需要：参考资料标题来自知识文件元数据，属外部输入；在
     unsafe_allow_html=True 下直出会构成存储型 XSS 面，故先 html.escape。
     URL 非空时渲染为带 rel=noopener 的新窗口链接，方便溯源跳转。
-
-    来源标注（数据源双轨）：真实史源显示 朝代·《书·篇卷》- 来源；persona
-    （内置摘要）附「（内置摘要）」。无书/篇时退回标题，与旧版一致。
     """
-    parts = []
-    for src in sources:
-        url = src.get("url", "")
-        if src.get("doc_type") == "historical" and (src.get("book") or "").strip():
-            loc = src.get("book", "")
-            if (src.get("chapter") or "").strip():
-                loc += "·" + src.get("chapter", "")
-            dynasty = (src.get("dynasty") or "").strip()
-            prefix = f"{dynasty}·" if dynasty else ""
-            label = f"《{loc}》- {prefix}{src.get('source', '未知')}"
-        elif src.get("doc_type") == "historical":
-            label = src.get("source", "未知")
-        else:
-            label = f"{src.get('title', '未知')}（内置摘要）"
+    rows = []
+    for i, src in enumerate(sources, 1):
+        label, attr, url = _source_parts(src)
         label = html_mod.escape(label)
         if url:
             url = html_mod.escape(url, quote=True)
-            parts.append(
-                f'<a href="{url}" target="_blank" rel="noopener noreferrer">{label}</a>'
+            link = (
+                f'<a class="src-link" href="{url}" target="_blank" '
+                f'rel="noopener noreferrer">{label}</a>'
             )
         else:
-            parts.append(label)
-    return "参考资料: " + " | ".join(parts)
+            link = label
+        attr_html = (
+            f'<span class="src-attr">{html_mod.escape(attr)}</span>' if attr else ""
+        )
+        rows.append(
+            f'<div class="src-item">'
+            f'<span class="src-idx">{i}</span>'
+            f'<div class="src-body">{link}{attr_html}</div>'
+            f"</div>"
+        )
+    return "\n".join(rows)
 
 
 # 最多在 session_state 里缓存多少个角色的消息（防无限增长，见 _prune_stale_messages）
@@ -123,13 +170,6 @@ def _prune_stale_messages(keep_name: str):
 
 def init_app():
     """初始化应用"""
-    st.set_page_config(
-        page_title="历史人物对话 · 水墨丹青",
-        page_icon="📜",
-        layout="wide",
-        initial_sidebar_state="expanded",
-    )
-
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
     st.markdown('<div class="ink-decoration"></div>', unsafe_allow_html=True)
 
@@ -137,6 +177,9 @@ def init_app():
     if "db_manager" not in st.session_state:
         st.session_state.db_manager = DatabaseManager()
 
+    if "entered" not in st.session_state:
+        # 开始界面门禁：未点击「开始对话」前只渲染落地页
+        st.session_state.entered = False
     if "current_character" not in st.session_state:
         st.session_state.current_character = None
     if "messages" not in st.session_state:
@@ -185,8 +228,16 @@ def init_app():
         )
 
 
-def render_sidebar():
-    """渲染侧边栏"""
+def render_sidebar(entered: bool = True):
+    """渲染侧边栏。
+
+    entered=False（开始界面阶段）时不渲染任何侧栏内容：开始界面是整屏沉浸式
+    落地页，侧栏整体隐藏（隐藏样式由 render_start_screen 注入，见其文档注释），
+    进入后才显示品牌/统计/历史对话/人物选择。
+    """
+    if not entered:
+        return
+
     db = st.session_state.db_manager
     session_id = get_session_id()
 
@@ -220,9 +271,24 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
 
+        # ─── 正在对话的角色（当前选中提示） ───
+        cur_char = st.session_state.current_character
+        if cur_char:
+            char = character_manager.get_character(cur_char)
+            if char:
+                st.markdown(f"""
+                <div class="now-chat">
+                    <span class="now-chat-avatar">{char.avatar}</span>
+                    <span>
+                        <span class="now-chat-name">{html_mod.escape(char.name)}</span>
+                        <span class="now-chat-meta">{html_mod.escape(char.dynasty)} · {html_mod.escape(char.title)}</span>
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+
         # ─── 历史对话（放在人物选择前面，方便查看） ───
         st.markdown("---")
-        st.markdown("### 历史对话")
+        st.markdown('<div class="sidebar-section-title">历史对话</div>', unsafe_allow_html=True)
         conversations = db.get_conversations(session_id, limit=10)
         if conversations:
             for conv in conversations:
@@ -257,12 +323,16 @@ def render_sidebar():
                             st.session_state.current_conversation_id = None
                             st.session_state.messages.get(char_name, []).clear()
                         st.rerun()
+                st.markdown(
+                    f'<div class="conv-time">{_format_time(conv.get("updated_at") or "")}</div>',
+                    unsafe_allow_html=True,
+                )
         else:
             st.markdown('<div style="color: #999; font-size: 0.85rem; padding: 0.5rem 0;">暂无历史对话</div>', unsafe_allow_html=True)
 
         # ─── 人物选择 ───
         st.markdown("---")
-        st.markdown("### 选择人物")
+        st.markdown('<div class="sidebar-section-title">选择人物</div>', unsafe_allow_html=True)
         for dynasty, characters in dynasties.items():
             with st.expander(f"⏳ {dynasty} · {len(characters)}人"):
                 for char in characters:
@@ -280,30 +350,99 @@ def render_sidebar():
                         st.markdown(f'<div class="char-title">{char.title}</div>', unsafe_allow_html=True)
 
 
-def render_welcome():
-    """渲染欢迎页面"""
-    st.markdown("""
-    <div class="welcome-container">
-        <h1 class="welcome-title">历史人物对话</h1>
-        <p class="welcome-subtitle">穿越五千年时光，与历史先贤促膝长谈</p>
+def render_start_screen():
+    """渲染开始界面（落地页）：整屏水墨山水沉浸式，点击「开始对话」后进入主界面。
+
+    打开应用的第一屏。本函数同时注入隐藏侧栏的 CSS——Streamlit 侧栏是全局布局
+    元素，无法按页面状态折叠，只能在开始界面阶段 display:none 藏掉；进入后
+    （entered=True）不再注入，侧栏自然恢复。隐藏期间主区域由 flex 自动占满全宽，
+    开始画面用 .start-screen 的 100vw 全出血铺开水墨背景（详见 styles.py）。
+    点击按钮置 entered=True 后 rerun 进入选人/对话流程。
+    """
+    st.markdown(
+        '<style>'
+        'section[data-testid="stSidebar"],'
+        'button[data-testid="stSidebarCollapsedControl"]'
+        '{display:none!important;}'
+        # 「开始对话」按钮上提到山峦下缘（开始页专属：负 margin 只在开始界面
+        # 阶段注入，进入后不注入，不影响后续页面的 .stButton 布局）。
+        '.stButton{margin-top:-3.5rem!important;}'
+        '</style>',
+        unsafe_allow_html=True,
+    )
+
+    total = character_manager.get_count()
+    dynasty_count = len(character_manager.get_characters_by_dynasty())
+    knowledge_count = st.session_state.get("knowledge_count", 0)
+    kb_chip = (
+        f'<span class="kb-chip ok">知识库已加载 {knowledge_count} 篇史料文档</span>'
+        if knowledge_count > 0
+        else '<span class="kb-chip err">知识库未加载，请运行 scripts/build_vector_db.py</span>'
+    )
+
+    st.markdown(f"""
+    <div class="start-screen">
+        <div class="paper-grain"></div>
+        <div class="ink-sun"></div>
+        <div class="mist mist-a"></div>
+        <div class="mist mist-b"></div>
+        <div class="mountain-far"></div>
+        <div class="mountain-mid"></div>
+        <div class="mountain-near"></div>
+        <div class="water-band"></div>
+        <div class="side-inscription">烟波浩渺<br/>与古为徒</div>
+        <div class="colophon">大江东去浪淘尽<br/>千古风流人物</div>
+        <div class="start-content">
+            <div class="hero-seal"><span>对</span><span>话</span><span>千</span><span>年</span></div>
+            <div class="hero-badge">千年对话 · 智能问答</div>
+            <h1 class="welcome-title">历史人物对话</h1>
+            <p class="welcome-subtitle">穿越五千年时光，与历史先贤促膝长谈</p>
+            {kb_chip}
+            <div class="hero-stats">
+                <div class="hero-stat"><b>{total}</b><span>历史人物</span></div>
+                <div class="hero-stat"><b>{dynasty_count}</b><span>朝代</span></div>
+                <div class="hero-stat"><b>{knowledge_count}</b><span>史料文档</span></div>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
+    # 开始按钮单独居中一行（type="primary" → kind="primary"，样式见 styles.py）。
+    # 不用 use_container_width：胶囊按钮按内容收缩、靠 CSS margin:auto 自身居中，
+    # 否则会和样式里的 width:auto 打架，导致按钮贴在列内一侧。
+    col_l, col_m, col_r = st.columns([1, 3, 1])
+    with col_m:
+        if st.button("🖌 开始对话", type="primary", key="start_enter"):
+            st.session_state.entered = True
+            st.rerun()
+
+
+def render_welcome():
+    """渲染欢迎页面"""
+    # 顶部数字与知识库状态统一走新设计系统的组件类
+    # （.hero-badge / .hero-stats / .kb-chip），替换旧的内联样式提示条。
+    total = character_manager.get_count()
+    dynasty_count = len(character_manager.get_characters_by_dynasty())
     knowledge_count = st.session_state.get("knowledge_count", 0)
-    if knowledge_count > 0:
-        st.markdown(f"""
-        <div style="text-align: center; margin: 1rem 0; padding: 0.5rem;
-                    background: rgba(184, 134, 11, 0.1); border-radius: 8px;">
-            <span style="color: var(--gold);">知识库已加载 {knowledge_count} 篇史料文档</span>
+    kb_chip = (
+        f'<span class="kb-chip ok">知识库已加载 {knowledge_count} 篇史料文档</span>'
+        if knowledge_count > 0
+        else '<span class="kb-chip err">知识库未加载，请运行 scripts/build_vector_db.py</span>'
+    )
+
+    st.markdown(f"""
+    <div class="welcome-container">
+        <div class="hero-badge">千年对话 · 智能问答</div>
+        <h1 class="welcome-title">历史人物对话</h1>
+        <p class="welcome-subtitle">穿越五千年时光，与历史先贤促膝长谈</p>
+        <div class="hero-stats">
+            <div class="hero-stat"><b>{total}</b><span>历史人物</span></div>
+            <div class="hero-stat"><b>{dynasty_count}</b><span>朝代</span></div>
+            <div class="hero-stat"><b>{knowledge_count}</b><span>史料文档</span></div>
         </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown(f"""
-        <div style="text-align: center; margin: 1rem 0; padding: 0.5rem;
-                    background: rgba(199, 62, 58, 0.1); border-radius: 8px;">
-            <span style="color: var(--vermillion);">知识库未加载，请运行 scripts/build_vector_db.py</span>
-        </div>
-        """, unsafe_allow_html=True)
+        {kb_chip}
+    </div>
+    """, unsafe_allow_html=True)
 
     # 最近对话
     db = st.session_state.db_manager
@@ -321,10 +460,14 @@ def render_welcome():
             if char:
                 with cols[i]:
                     st.markdown(f"""
-                    <div class="recommend-card">
-                        <div class="recommend-avatar">{char.avatar}</div>
-                        <div class="recommend-name">{char.name}</div>
-                        <div class="recommend-dynasty">{conv['title'][:20]}</div>
+                    <div class="recent-card">
+                        <div class="recent-card-top">
+                            <span class="recent-avatar">{char.avatar}</span>
+                            <span class="recent-name">{html_mod.escape(char.name)}</span>
+                            <span class="recent-char">{html_mod.escape(char.dynasty)}</span>
+                            <span class="recent-time">{_format_time(conv.get("updated_at") or "")}</span>
+                        </div>
+                        <div class="recent-title">{html_mod.escape(conv["title"])}</div>
                     </div>
                     """, unsafe_allow_html=True)
                     if st.button("继续对话", key=f"resume_{conv['id']}", use_container_width=True):
@@ -359,12 +502,19 @@ def render_welcome():
     for i, (name, dynasty, avatar) in enumerate(recommended):
         char = character_manager.get_character(name)
         if char:
+            # 推荐卡加一句人物名言（.rec-quote），来自本地 YAML（受信任），
+            # 仍按纵深防御策略转义（与人物简介一致）。
+            quote = char.famous_quotes[0] if char.famous_quotes else ""
+            quote_html = (
+                f'<div class="rec-quote">{html_mod.escape(quote)}</div>' if quote else ""
+            )
             with cols[i]:
                 st.markdown(f"""
                 <div class="recommend-card">
                     <div class="recommend-avatar">{avatar}</div>
-                    <div class="recommend-name">{name}</div>
-                    <div class="recommend-dynasty">{dynasty}</div>
+                    <div class="recommend-name">{html_mod.escape(name)}</div>
+                    <div class="recommend-dynasty">{html_mod.escape(dynasty)}</div>
+                    {quote_html}
                 </div>
                 """, unsafe_allow_html=True)
                 if st.button("对话", key=f"rec_{name}", use_container_width=True):
@@ -374,6 +524,11 @@ def render_welcome():
                         st.session_state.messages[name] = []
                     _prune_stale_messages(name)
                     st.rerun()
+
+    st.markdown(
+        '<div class="welcome-hint">✦ 从侧栏或下方人物卡片中选择一位，开始对话 ✦</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def render_character_profile():
@@ -430,13 +585,21 @@ def render_chat():
     # 显示历史消息
     for msg in messages:
         with st.chat_message(msg["role"]):
+            # assistant 消息带角色名头部（.chat-author），与实时回复保持一致
+            if msg["role"] == "assistant" and char:
+                st.markdown(f"""
+                <div class="chat-author">
+                    <span class="chat-author-name">{char.avatar} {html_mod.escape(char.name)}</span>
+                    <span class="chat-author-meta">{html_mod.escape(char.dynasty)} · {html_mod.escape(char.title)}</span>
+                </div>
+                """, unsafe_allow_html=True)
             st.write(msg["content"])
             if "sources" in msg and msg["sources"]:
-                st.markdown(
-                    f'<div style="font-size: 0.75rem; color: #888; margin-top: 0.5rem;">'
-                    f'{_render_sources_html(msg["sources"])}</div>',
-                    unsafe_allow_html=True
-                )
+                with st.expander("参考史料"):
+                    st.markdown(
+                        _render_sources_html(msg["sources"]),
+                        unsafe_allow_html=True
+                    )
 
     # 输入框
     if prompt := st.chat_input(f"向{char_name}提问..."):
@@ -447,6 +610,12 @@ def render_chat():
         st.session_state.messages[char_name] = messages
 
         with st.chat_message("assistant"):
+            st.markdown(f"""
+            <div class="chat-author">
+                <span class="chat-author-name">{char.avatar} {html_mod.escape(char.name)}</span>
+                <span class="chat-author-meta">{html_mod.escape(char.dynasty)} · {html_mod.escape(char.title)}</span>
+            </div>
+            """, unsafe_allow_html=True)
             with st.spinner(f"{char.avatar} {char_name}正在思考..."):
                 agent = st.session_state.agent_manager.get_agent(char_name)
                 if agent:
@@ -460,11 +629,11 @@ def render_chat():
                         st.write(response)
 
                         if sources:
-                            st.markdown(
-                                f'<div style="font-size: 0.75rem; color: #888; margin-top: 0.5rem;">'
-                                f'{_render_sources_html(sources)}</div>',
-                                unsafe_allow_html=True
-                            )
+                            with st.expander("参考史料"):
+                                st.markdown(
+                                    _render_sources_html(sources),
+                                    unsafe_allow_html=True
+                                )
 
                         messages.append({
                             "role": "assistant",
@@ -478,7 +647,9 @@ def render_chat():
 
     # 操作按钮
     if messages:
-        st.markdown("---")
+        # 分隔线自带操作条间距（.divider 墨线 + .chat-actions 顶部留白），
+        # 用自闭合 div 而非跨 widget 开合 div，避免破坏 Streamlit 布局。
+        st.markdown('<div class="divider chat-actions"></div>', unsafe_allow_html=True)
         col1, col2, col3, col4 = st.columns([1, 1, 1, 3])
         with col1:
             if st.button("删除对话", use_container_width=True):
@@ -544,7 +715,14 @@ def render_chat():
 
 def main():
     init_app()
-    render_sidebar()
+
+    if not st.session_state.entered:
+        # 开始界面阶段：侧栏只留品牌 + 主区域落地页
+        render_sidebar(entered=False)
+        render_start_screen()
+        return
+
+    render_sidebar(entered=True)
 
     if st.session_state.current_character:
         render_character_profile()
