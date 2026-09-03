@@ -10,6 +10,12 @@
 
 ## 📸 项目预览
 
+### 🖥️ 开始界面
+
+<div align="center">
+  <img src="images/开始.png" alt="开始" width="800"/>
+</div>
+
 ### 🎭 人物选择界面
 
 <div align="center">
@@ -21,8 +27,6 @@
 <div align="center">
   <img src="images/对话展示.png" alt="对话展示界面" width="800"/>
 </div>
-
-### 🖥️ 聊天界面
 
 <div align="center">
   <img src="images/人物选择.png" alt="聊天界面" width="800"/>
