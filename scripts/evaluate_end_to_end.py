@@ -186,7 +186,14 @@ def main():
 
         path = rag.scores.get("path") if rag else None
         n_sources = len(rag.sources) if rag else 0
-        cited = list(getattr(llm_backend, "last_cited", [])) if args.llm == "mock" else []
+        if args.llm == "mock":
+            cited = list(getattr(llm_backend, "last_cited", []))
+        else:
+            # live 模式真实模型没有 mock 的 last_cited 属性（原实现硬编码
+            # []，导致"结构化引用 0/198"有一半是测量假零）。chat() 内部
+            # 仅在结构化解析成功且存在合法引用索引时才追加【参考史料】footer，
+            # 故以 footer 是否出现作为 live 的结构化引用成功信号。
+            cited = [0] if "【参考史料】" in reply else []
         dropped = [c for c in cited if c >= n_sources] if rag else []
         has_footer = "【参考史料】" in reply
 

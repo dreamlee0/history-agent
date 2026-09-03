@@ -5,6 +5,7 @@
 本次检索集合内才渲染。本文件覆盖解析与校验逻辑本身。
 """
 import pytest
+from types import SimpleNamespace
 
 from src.agents.history_agent import HistoryCharacterAgent
 
@@ -59,6 +60,131 @@ class TestValidateCited:
 
     def test_all_invalid(self):
         assert HistoryCharacterAgent._validate_cited([9, 10], 3) == []
+
+
+class TestJsonModeWireup:
+    """结构化引用高成功率的关键：_call_api_with_retry 从 API 层强制
+    response_format=json_object，端点不支持时自动降级（不崩溃）。"""
+
+    def _make_agent(self):
+        from config import get_settings
+        from src.characters import character_manager
+
+        agent = HistoryCharacterAgent.__new__(HistoryCharacterAgent)
+        agent.settings = get_settings()
+        agent.character = character_manager.get_character("李白")
+        agent.vector_store = None
+        agent.db = None
+        agent._json_mode = True
+        agent._llm_backend = None
+        return agent
+
+    def _ok_response(self, content):
+        return SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=content))],
+            usage=None,
+        )
+
+    def test_unsupported_param_error_detection(self):
+        # 400 + unknown parameter → 判定为"端点不支持 response_format"
+        e1 = Exception("unknown parameter 'response_format'")
+        e1.status_code = 400
+        assert HistoryCharacterAgent._is_unsupported_param_error(e1) is True
+        e2 = Exception("BadRequestError: invalid api key")
+        e2.status_code = 400
+        assert HistoryCharacterAgent._is_unsupported_param_error(e2) is False
+        e3 = Exception("timeout")
+        e3.status_code = 500
+        assert HistoryCharacterAgent._is_unsupported_param_error(e3) is False
+
+    def test_call_api_passes_response_format(self, monkeypatch):
+        agent = self._make_agent()
+        captured = {}
+
+        def _create(**kwargs):
+            captured.update(kwargs)
+            return self._ok_response('{"reply": "hi", "cited_sources": [0]}')
+
+        agent.client = SimpleNamespace(
+            chat=SimpleNamespace(completions=SimpleNamespace(create=_create))
+        )
+        out = agent._call_api_with_retry(
+            [{"role": "user", "content": "q"}], temperature=0.5
+        )
+        assert captured["response_format"] == {"type": "json_object"}
+        assert out == '{"reply": "hi", "cited_sources": [0]}'
+
+    def test_call_api_degrades_gracefully_when_unsupported(self, monkeypatch):
+        agent = self._make_agent()
+        calls = []
+
+        def _create(**kwargs):
+            calls.append(kwargs)
+            if len(calls) == 1:
+                err = Exception("unknown parameter 'response_format'")
+                err.status_code = 400
+                raise err
+            return self._ok_response("普通回复")
+
+        agent.client = SimpleNamespace(
+            chat=SimpleNamespace(completions=SimpleNamespace(create=_create))
+        )
+        out = agent._call_api_with_retry(
+            [{"role": "user", "content": "q"}], temperature=0.5
+        )
+        assert out == "普通回复"  # 不崩溃，正常返回
+        assert calls[0]["response_format"] == {"type": "json_object"}
+        assert "response_format" not in calls[1]  # 第二次降级不再传
+        assert agent._json_mode is False  # 实例级标记已关闭
+
+    def test_chat_retries_once_on_parse_failure_then_renders(self, monkeypatch):
+        """解析失败 → 一次强 JSON 约束重试 → 成功渲染【参考史料】footer。
+
+        回归点：json_object 下仍可能拿到"合法 JSON 但格式走样"的输出，
+        必须有定向重试，而不是直接回退纯文本丢掉引用。
+        """
+        from config import get_settings
+        from src.characters import character_manager
+        from src.memory import conversation_memory
+        from src.agents.history_agent import RAGContext
+        from langchain_core.documents import Document
+
+        agent = self._make_agent()
+        fake_docs = [
+            Document(
+                page_content="内容A",
+                metadata={"title": "甲书", "source": "s1", "url": "", "character": "李白"},
+            )
+        ]
+        fake_sources = [
+            {"index": 1, "title": "甲书", "source": "s1", "url": "", "character": "李白"}
+        ]
+
+        def _fake_retrieve(query, request_id=None):
+            return RAGContext(
+                query=query, documents=fake_docs,
+                context_text="[史料1] 来源: s1 - 甲书\n内容A",
+                sources=fake_sources,
+            )
+
+        monkeypatch.setattr(agent, "_retrieve_knowledge", _fake_retrieve)
+        calls = {"n": 0}
+
+        def _fake_api(messages, **kw):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return "（模型第一轮没按 JSON 输出）"
+            return '{"reply": "依据甲书回答。", "cited_sources": [0]}'
+
+        monkeypatch.setattr(agent, "_call_api_with_retry", _fake_api)
+
+        reply, sources, _ = agent.chat("测试", session_id="t2")
+        assert calls["n"] == 2  # 恰好重试一次
+        assert "依据甲书回答。" in reply
+        assert "【参考史料】" in reply
+        assert [s["title"] for s in sources] == ["甲书"]
+
+        conversation_memory.clear_all()
 
 
 def test_chat_filters_sources_to_cited(monkeypatch):

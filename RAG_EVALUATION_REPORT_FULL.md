@@ -550,6 +550,30 @@ citation_accuracy 0.472 / 引用覆盖率 0.750 / JSON 解析失败率 11.6%（<
 > 引用渲染与延迟的端到端验证**：路由分配合规（库外 22/22 拒绝、多人物 31 条走
 > multi），引用渲染 94.3%、库外不注入引用，延迟 p90 6.4s 可接受。
 
+---
+
+### 2026-09-03 修复：结构化引用 0/198 → 真实模型下 10/10（抽样）
+
+上表"结构化引用索引（`[n]` cite）0/198"有两重成因，均已修复（详见 CHANGELOG 2026-09-03）：
+
+1. **根因（可靠性）**：生产 `_call_api_with_retry` 未传 `response_format=json_object`，
+   仅靠提示词要求模型输出 `{reply, cited_sources}`，真实模型常不遵守 → 解析失败回退纯文本。
+   **修复**：`chat.completions.create` 传 `response_format={"type":"json_object"}` 从 API 层
+   强制合法 JSON；端点不支持（400/422 unknown parameter）时自动降级普通输出（实例级
+   `_json_mode` 开关，不崩溃）；解析仍失败时做一次"只输出 JSON"强约束定向重试，仍失败
+   才回退纯文本（对话永不阻塞）。
+2. **测量盲区**：`evaluate_end_to_end.py` 对 live 模式 `cited` 硬编码 `[]`（真实模型没有
+   mock 的 `last_cited` 属性）——0/198 有一半是测出来的假零。**修复**：live 以回复中是否
+   出现【参考史料】footer 判定结构化引用成功（`chat()` 仅在解析成功且有合法引用时追加 footer）。
+
+**修复后实跑（真实模型 deepseek-v4-flash，`--llm live --limit 10`）**：
+带引用（【参考史料】）回答占比 **10/10（100%）**，越界引用丢弃 0，路由正确 10/10，
+期望实体率 9/10。结构化引用在真实模型下已可靠渲染；`[n]` 编号与 footer 引用由代码侧
+生成并校验，可溯源保证成立。
+
+> 注：10 条为修复后的抽样验证，勿与 198 条全量数字并列；如需全量可
+> `python scripts/evaluate_end_to_end.py --llm live`（付费 API，约 15 分钟）。
+
 **对照二：PERSONA_FALLBACK=off（严格模式，persona 完全退出史实检索）**
 
 同 93 条（前段单相关为主）对比（增量缓存可续跑完整 198 条）：

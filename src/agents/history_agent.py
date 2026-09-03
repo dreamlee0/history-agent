@@ -122,6 +122,12 @@ class HistoryCharacterAgent:
         self.character = character
         self.vector_store = vector_store
         self.db = db_manager
+        # 结构化引用 JSON 模式（response_format={"type":"json_object"}）：
+        # 从 API 层强制模型输出合法 JSON，而非只靠提示词"自觉"——这是
+        # 真实模型下结构化引用渲染率低的根因。若端点不支持该参数
+        # （部分 OpenAI 兼容 API 会 400/422），_call_api_with_retry 会
+        # 自动降级为普通输出并置 False（见 _is_unsupported_param_error）。
+        self._json_mode = True
         # 可注入的 LLM 后端：callable(messages, temperature) -> str。
         # 测试/评测（scripts/evaluate_end_to_end.py）注入确定性 mock 以离线
         # 跑通完整 chat 链路；生产默认 None 走下方 OpenAI 兼容客户端。
@@ -726,6 +732,31 @@ class HistoryCharacterAgent:
         msg = str(e).lower()
         return "connection" in msg or "timeout" in msg
 
+    @staticmethod
+    def _is_unsupported_param_error(e: Exception) -> bool:
+        """判断是否是"端点不支持 response_format/json_object 参数"的确定性错误。
+
+        部分 OpenAI 兼容端点（不同版本的智谱/自建网关等）不认识
+        response_format，会返回 400/422 及 "unknown parameter" 之类报错。
+        这类错误确定性可判断：一旦发生就应关闭 json 模式并原地重试，
+        而不是走 _is_retryable_error 的指数退避（那是给瞬时错误的）。
+        """
+        status = getattr(e, "status_code", None)
+        if status not in (400, 422):
+            return False
+        msg = str(e).lower()
+        return any(
+            k in msg
+            for k in (
+                "response_format",
+                "json_object",
+                "unknown parameter",
+                "unsupported parameter",
+                "unknown argument",
+                "extra fields not permitted",
+            )
+        )
+
     def _call_api_with_retry(
         self,
         messages: list,
@@ -749,7 +780,8 @@ class HistoryCharacterAgent:
 
         rid = request_id or "?"
         start = time.monotonic()
-        for attempt in range(max_retries):
+        attempt = 0
+        while attempt < max_retries:
             try:
                 if self._llm_backend is not None:
                     # 测试/评测注入的 mock backend（callable(messages, temperature)->str），
@@ -757,22 +789,40 @@ class HistoryCharacterAgent:
                     content = self._llm_backend(messages, temperature)
                     usage = None
                 else:
-                    response = self.client.chat.completions.create(
+                    kwargs = dict(
                         model=self.settings.llm_model,
                         messages=messages,
                         temperature=temperature,
                         max_tokens=self.settings.llm_max_tokens,
                     )
+                    if self._json_mode:
+                        # json_object：从 API 层强制合法 JSON，结构化引用
+                        # 解析才有高成功率——0/198 的根因正是仅提示词要求
+                        # 输出 {reply, cited_sources} 时真实模型不遵守。
+                        kwargs["response_format"] = {"type": "json_object"}
+                    response = self.client.chat.completions.create(**kwargs)
                     content = response.choices[0].message.content
                     usage = getattr(response, "usage", None)
             except Exception as e:
                 error_msg = str(e)
+                if self._json_mode and self._is_unsupported_param_error(e):
+                    # 端点不认识 response_format 参数（部分兼容 API）：
+                    # 关闭 json 模式原地重试，不消耗重试次数、不走指数退避。
+                    self._json_mode = False
+                    logger.warning(
+                        "[TRACE:%s] 端点不支持 response_format=json_object，"
+                        "已降级为普通输出（结构化引用回退提示词约束）",
+                        rid,
+                    )
+                    time.sleep(0.2)
+                    continue
                 if not self._is_retryable_error(e):
                     # 确定性错误（4xx 等）：重试无意义，立即抛出
                     raise Exception(f"API调用失败: {error_msg}")
                 if attempt < max_retries - 1:
                     wait_time = 2 ** attempt  # 指数退避
                     time.sleep(wait_time)
+                    attempt += 1
                     continue
                 # 最后一次重试也失败（瞬时错误持续存在）
                 if "Connection" in error_msg or "timeout" in error_msg.lower():
@@ -786,6 +836,7 @@ class HistoryCharacterAgent:
                 # 模型返回空内容：再试一次（可能是瞬时异常），仍空则明确报错
                 if attempt < max_retries - 1:
                     time.sleep(2 ** attempt)
+                    attempt += 1
                     continue
                 raise Exception("模型返回了空内容，请重试")
             # 记录 token 用量与耗时（可观测性）；mock backend 无 usage，
@@ -801,6 +852,8 @@ class HistoryCharacterAgent:
                 getattr(usage, "total_tokens", "?") if usage else "?",
             )
             return content
+        # 防御：理论上不可达（循环内所有路径要么 return 要么 raise）
+        raise Exception("API调用失败: 重试次数耗尽")
 
     def chat(
         self,
@@ -890,6 +943,43 @@ class HistoryCharacterAgent:
         sources = rag_context.sources if rag_context else []
         if rag_context:
             parsed = self._parse_structured_reply(result)
+            if parsed is None:
+                # 兜底：json_object 下仍可能拿到"合法 JSON 但缺 reply/格式
+                # 走样"（推理模型截断、reasoning 吃预算等）。做一次有针对性
+                # 的重试（追加"只输出 JSON"强约束），仍失败才回退纯文本。
+                logger.warning(
+                    "[TRACE:%s] 结构化引用解析失败，重试一次（强化 JSON 约束）",
+                    request_id,
+                )
+                nudge = {
+                    "role": "user",
+                    "content": '只输出一个 JSON 对象：{"reply": "你的完整回答", '
+                               '"cited_sources": [引用到的史料索引数组]}，'
+                               "不要输出任何其他文字。",
+                }
+                try:
+                    result2 = self._call_api_with_retry(
+                        messages + [nudge],
+                        temperature=temperature,
+                        request_id=request_id,
+                    )
+                except Exception:
+                    result2 = None
+                if result2 is not None:
+                    parsed2 = self._parse_structured_reply(result2)
+                    if parsed2 is not None:
+                        parsed = parsed2
+                        result = result2
+                    else:
+                        logger.warning(
+                            "[TRACE:%s] 结构化引用重试仍解析失败，回退纯文本输出",
+                            request_id,
+                        )
+                else:
+                    logger.warning(
+                        "[TRACE:%s] 结构化引用重试调用失败，回退纯文本输出",
+                        request_id,
+                    )
             if parsed is not None:
                 reply_text, cited = parsed
                 valid = self._validate_cited(cited, len(sources))
@@ -908,10 +998,6 @@ class HistoryCharacterAgent:
                         "[TRACE:%s] 丢弃越界引用索引 %s（不在本次检索集合内）",
                         request_id, dropped,
                     )
-            else:
-                logger.warning(
-                    "[TRACE:%s] 结构化引用解析失败，回退纯文本输出", request_id
-                )
 
         # 保存助手消息
         if self.db and conversation_id:
