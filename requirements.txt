@@ -26,7 +26,9 @@ requests>=2.31.0
 curl_cffi>=0.16.0  # 百度百科抓取：Chrome TLS 指纹绕过 WAF 403（可选，缺省时退回 requests）
 
 # Web UI
-streamlit>=1.30.0
+# 钉死 1.32.0：按钮居中/样式注入经本地 playwright 在 1.32 全视口验证（0.0px 偏差），
+# 新版 Streamlit 会改按钮外层 HTML/CSS（可能包进 flex 容器导致 margin:auto 失效），不可控版本漂移
+streamlit==1.32.0
 
 # PDF导出
 reportlab>=4.0.0
