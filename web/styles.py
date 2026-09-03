@@ -743,10 +743,25 @@ CUSTOM_CSS = """
         100% { transform: rotate(-4deg) scale(1);    opacity: 1; }
     }
 
+    /* 开始界面「开始对话」按钮容器居中（2026-09-03 修复，streamlit 1.63）：
+       Streamlit 1.63 起 st.button 被包进 shrink-wrap 的 stElementContainer
+       （带 st-key-<key> 类），容器收缩成按钮自身宽度、内部 margin:auto 没有
+       剩余空间可分，按钮在 3/5 列内被上层 flex justify:start 左对齐（实测
+       1280 视口偏左 86px）。强制该容器全宽 + flex 居中即回正中心。
+       key 对应 app.py 的 st.button(key="start_enter")；1.32 无此容器层，
+       该选择器不匹配、无副作用。 */
+    .st-key-start_enter {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
     /* 主按钮（st.button type="primary" → kind="primary"）：
        大号金边药丸，仅用于开始界面「开始对话」。
        display:block + margin:auto 让胶囊在列内自身居中（streamlit 容器默认
-       不居中），故调用处不用 use_container_width。入场动画随整页交错编排。 */
+       不居中；1.63 由上方 .st-key-start_enter 容器规则负责水平居中，
+       此处的 auto 边距与之配合不冲突），故调用处不用 use_container_width。
+       入场动画随整页交错编排。 */
     .stButton button[kind="primary"] {
         font-family: var(--font-label) !important;
         font-size: 1.2rem !important;
