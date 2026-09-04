@@ -476,7 +476,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       </div>
       <div class="card feature rise reveal d2">
         <div class="card-h"><span class="idx">八</span><h3>🧪 工程化与测试</h3></div>
-        <p>110 个 pytest 用例（人物加载、知识库完整性、RAG 防污染、多人物联合检索、BM25、多格式解析、端到端等），Dev Container + Streamlit Cloud 部署支持。</p>
+        <p>114 个 pytest 用例（人物加载、知识库完整性、RAG 防污染、多人物联合检索、BM25、多格式解析、端到端、json_object 接线等），Dev Container + Streamlit Cloud 部署支持。</p>
       </div>
     </div>
   </div>
@@ -701,7 +701,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
 │   ├── app.py              <span class="cm"># 主应用（Secrets 桥接 / 界面 / 会话）</span>
 │   ├── styles.py           <span class="cm"># 水墨丹青 CSS</span>
 │   └── export_utils.py     <span class="cm"># Markdown / PDF 导出</span>
-├── <span class="dir">tests/</span>           <span class="cm"># 110 个 pytest 用例（检索 / 防污染 / BM25 / 多格式 / 爬虫 / 端到端等）</span>
+├── <span class="dir">tests/</span>           <span class="cm"># 114 个 pytest 用例（检索 / 防污染 / BM25 / 多格式 / 爬虫 / 端到端等）</span>
 ├── <span class="dir">images/</span>          <span class="cm"># 项目截图</span>
 ├── .devcontainer/          <span class="cm"># Dev Container 开发环境</span>
 ├── .streamlit/config.toml  <span class="cm"># Streamlit 服务器配置</span>
@@ -811,7 +811,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
       <span class="seal-num">拾</span>
       <div class="eyebrow">TESTING</div>
       <h2 class="section-title">测试<span class="cn">体系</span></h2>
-      <p class="section-sub">110 个用例覆盖 13 个测试模块，检索防污染与防幻觉是核心护城河</p>
+      <p class="section-sub">114 个用例覆盖 13 个测试模块，检索防污染与防幻觉是核心护城河</p>
     </div>
     <div class="test-grid">
       <div class="test-card reveal d1">
@@ -877,7 +877,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
 <pre><span class="k">pytest</span> tests/ -v</pre>
     </div>
     <div class="note info reveal" style="margin-top:16px">
-      <b>当前实测（2026-09-02）：</b>多相关枚举 Recall@7 <b>0.745</b>（train 0.732 / holdout 0.803，改进前 @3 = 0.307）；库外拒绝 <b>22/22</b>、自传注入 0/22；单相关 hit@1 0.897 / MRR 0.933 / 决策正确率 0.986；单元测试 <b>110/110</b>。在线生成（真实 DeepSeek-v4-flash）：Faithfulness <b>0.227</b> / Answer Relevancy <b>0.570</b> / Citation Accuracy <b>0.740</b> / 引用覆盖率 0.773。完整数据见 <code>RAG_EVALUATION_REPORT_FULL.md</code> §14。
+      <b>当前实测（检索层 2026-09-03、生成层 2026-09-04 重测）：</b>多相关枚举 Recall@7 <b>0.745</b>（train 0.732 / holdout 0.803，改进前 @3 = 0.307）；库外拒绝 <b>22/22</b>、自传注入 0/22；单相关 hit@1 0.897 / MRR 0.933 / 决策正确率 0.986；单元测试 <b>114/114</b>。在线生成（50 条代表性抽样，判定噪声修复后）：Faithfulness <b>0.636</b>（非负类 <b>0.723</b>）/ Answer Relevancy <b>0.604</b> / Citation Accuracy <b>0.735</b> / 引用覆盖率 0.880 / JSON 解析失败率 0%（初测 0.227 系判定层单次判定噪声 20.6% 翻转所致，3 轮多数投票修复后提升 3 倍）；e2e live 结构化引用：带【参考史料】引用 <b>18/20（90%）</b>、越界引用丢弃 0、路由 20/20（2026-09-03 修复：`response_format=json_object` 强制 + 测量修复）。完整数据见 <code>RAG_EVALUATION_REPORT_FINAL.md</code>。
     </div>
     <div class="note warn reveal">
       <b>注意：</b>无本地 Embedding 缓存的机器会自动跳过需要 embedding 的检索类测试（见 <code>tests/conftest.py</code>）。
@@ -900,7 +900,7 @@ footer .fline{margin-top:10px;letter-spacing:.3em;color:var(--gold)}
         <ul style="padding-left:1.1em;color:var(--ink-soft);font-size:.95rem">
           <li style="margin-top:8px">97/97 人物均有真实史源，但以列传 / 章节节选为主，单篇深度有限，冷门细节覆盖仍不足；</li>
           <li style="margin-top:8px">21 篇百度百科为三手资料（非正史原文），权威性低于古籍原文，如实标注、仅作引用溯源；</li>
-          <li style="margin-top:8px">LLM 依赖外部 API（需联网），本地仅 Embedding 离线；在线生成指标为真实 DeepSeek 实测，Faithfulness 0.227 仍有提升空间。</li>
+          <li style="margin-top:8px">LLM 依赖外部 API（需联网），本地仅 Embedding 离线；在线生成指标为真实 DeepSeek 实测，判定噪声修复后 Faithfulness 0.636（非负类 0.723），残余低分为语料覆盖缺口。</li>
         </ul>
       </div>
       <div class="card rise reveal d2">

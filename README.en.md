@@ -218,7 +218,7 @@ RETRIEVAL_MODE=hybrid python scripts/evaluate_retrieval_full.py  # hybrid retrie
 python scripts/benchmark_retrieval.py --limit 20
 python scripts/benchmark_retrieval.py --limit 20 --out bench.json   # dump results to file
 
-# End-to-end evaluation: Mock LLM runs the full chat() pipeline offline (routing / citation grounding / latency); --llm live calls the real model (198 items verified, see report §14.5)
+# End-to-end evaluation: Mock LLM runs the full chat() pipeline offline (routing / citation grounding / latency); --llm live calls the real model (verified, see RAG_EVALUATION_REPORT_FINAL.md §3.4)
 python scripts/evaluate_end_to_end.py
 python scripts/evaluate_end_to_end.py --bad-cite   # verify out-of-range citations are dropped
 python scripts/evaluate_end_to_end.py --llm live   # real model (requires DeepSeek key in .env)
@@ -230,13 +230,13 @@ python scripts/evaluate_generation.py --split holdout --cache ...             # 
 # Reports Faithfulness / Answer Relevancy / Citation Accuracy / citation coverage / JSON parse-failure rate
 ```
 
-**Current results (2026-09-02; retrieval deterministic & offline, generation on real DeepSeek-v4-flash)**:
-- Multi-relevant Recall@7 **0.745** (train 0.732 / holdout 0.803; baseline @3 = 0.307); out-of-KB rejection **22/22**, self-bio injection 0/22;
-- Single-relevant hit@1 0.897 / MRR 0.933 / decision accuracy 0.986 (no regression); unit tests 110/110;
-- Online generation: Faithfulness **0.227** / Answer Relevancy **0.570** / Citation Accuracy **0.740** / citation coverage 0.773 (train ≈ holdout — no overfitting).
+**Current results (retrieval deterministic & offline; generation on real DeepSeek-v4-flash)**:
+- Retrieval: Multi-relevant Recall@7 **0.745**; out-of-KB rejection **22/22**, self-bio injection 0/22; single-relevant hit@1 0.897 / MRR 0.933 / decision accuracy 0.986; unit tests 114/114;
+- Generation (50-item stratified sample): Faithfulness **0.636** (non-negative **0.723**) / Answer Relevancy 0.604 / Citation Accuracy 0.735 / citation coverage 0.880;
+- e2e live structured citation: 【参考史料】citations **18/20 (90%)**, 0 out-of-range dropped, routing 20/20.
 
-Full multi-round comparison data:
-[RAG_EVALUATION_REPORT_FULL.md](RAG_EVALUATION_REPORT_FULL.md) (§7 hybrid comparison / §8 latency-cost / §9 end-to-end / §10 multi-format parsing / §12 reproduction / **§14 five-problem overhaul**).
+Full metrics, methodology and optimization details:
+[RAG_EVALUATION_REPORT_FINAL.md](RAG_EVALUATION_REPORT_FINAL.md).
 
 ### 📄 Multi-format Document Parsing
 

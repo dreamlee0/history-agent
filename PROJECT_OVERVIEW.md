@@ -4,7 +4,7 @@
 
 | 版本 | 说明 |
 |------|------|
-| 文档状态 | 2026-09-02 依据当前代码库更新（数据源升级 + 精确检索确定性修复后） |
+| 文档状态 | 2026-09-03 依据当前代码库更新（数据源升级 + 精确检索确定性修复 + 结构化引用 18/20（90%）修复后） |
 | 项目性质 | 学习复现 + 工程化改造的完整 RAG 对话系统（历史人物对话） |
 | 代码仓库 | [github.com/dreamlee0/history-rag-chat](https://github.com/dreamlee0/history-rag-chat) |
 
@@ -35,7 +35,7 @@
   **97/97 人均有 historical 文件**；带 朝代·书·篇卷 标注，由本地向量库检索增强生成；
   真实史源优先、persona 补位，`PERSONA_FALLBACK=off` 可完全移出 persona（详见 DATA_SOURCES.md）；
 - **多人物联合检索**（五大问题整改）：点名 ≥2 人或枚举题走 multi 分支（`$in` 联合池 + 容量放大到
-  `MULTI_TOP_K=7`），多相关枚举 Recall@7 0.178 → 0.745（详见 RAG_EVALUATION_REPORT_FULL.md §14）；
+  `MULTI_TOP_K=7`），多相关枚举 Recall@7 0.178 → 0.745（详见 RAG_EVALUATION_REPORT_FINAL.md）；
 - 每条回答末尾自动标注【参考史料】，支持**知识溯源**；
 - 检索采用"按人物过滤优先 + 全局兜底"策略，避免跨人物史料污染（详见 4.3）。
 
@@ -58,8 +58,8 @@
 - 提供史料**爬虫**（`crawl_knowledge.py`，项目唯一爬虫）、**知识生成**（`generate_knowledge.py`）与**向量库构建**（`build_vector_db.py`）脚本，支持知识库扩展。
 
 ### 2.8 工程化与测试
-- **110 个 pytest 用例**（人物加载、知识库完整性、RAG 检索防污染、防幻觉提示词、记忆隔离、
-  双轨数据源、多格式文档解析、抓取器、端到端引用校验等）；
+- **114 个 pytest 用例**（人物加载、知识库完整性、RAG 检索防污染、防幻觉提示词、记忆隔离、
+  双轨数据源、多格式文档解析、抓取器、端到端引用校验、json_object 接线等）；
 - Dev Container + Streamlit Cloud 部署支持。
 
 ---
@@ -106,7 +106,7 @@
         │ 数据层           │  │ 配置层     │   │ 工具链           │
         │ data/knowledge  │  │ config/    │   │ scripts/(爬虫/  │
         │ (99篇史料)      │  │ settings   │   │ 构建向量库/生成) │
-        │ data/characters │  │ (.env/     │   │ tests/(110用例) │
+        │ data/characters │  │ (.env/     │   │ tests/(114用例) │
         │ (97位YAML)      │  │ Secrets)   │   │                 │
         └─────────────────┘  └───────────┘   └─────────────────┘
 ```
@@ -199,7 +199,7 @@ history-rag-chat/
 │   ├── app.py                 # Streamlit 主应用（Secrets 桥接/界面/会话）
 │   ├── styles.py              # 水墨丹青 CSS
 │   └── export_utils.py        # Markdown/PDF 导出
-├── tests/                     # 110 个 pytest 用例（13 个测试模块）
+├── tests/                     # 114 个 pytest 用例（13 个测试模块）
 ├── images/                    # 项目截图
 ├── .devcontainer/             # Dev Container 开发环境
 ├── .streamlit/config.toml     # Streamlit 服务器配置
@@ -270,7 +270,7 @@ streamlit run web/app.py
 
 ## 八、测试
 
-**110 个用例**（`python -m pytest tests/` 实际收集），覆盖 13 个测试模块：
+**114 个用例**（`python -m pytest tests/` 实际收集），覆盖 13 个测试模块：
 
 | 模块 | 覆盖内容 |
 |------|----------|
@@ -301,9 +301,14 @@ pytest tests/ -v
   **97/97 人均有 historical 文件**（五大问题整改·阶段1 完成，原 28 人 persona 兜底已清零）；
 - 百度百科为**三手资料**（非正史原文，权威性低于古籍原文），如实标注、仅作引用溯源；
   中文维基百科暂未入库（本环境不可达），网络恢复后可由 `--sources wiki` 补抓；
-- 生成层在线评测（DeepSeek-v4-flash）：Faithfulness 0.227 / Answer Relevancy 0.570 /
-  Citation Accuracy 0.740——低忠实度主要反映语料覆盖缺口（部分枚举题检索只命中
-  1-2 人、库外 no-RAG 回答记 0 分），非评测假象；
+- 生成层在线评测（DeepSeek-v4-flash，2026-09-04 判定层噪声修复后 50 条代表性抽样）：
+  Faithfulness **0.636**（非负类 **0.723**）/ Answer Relevancy 0.604 / Citation Accuracy 0.735 /
+  引用覆盖率 0.880 / JSON 解析失败率 0%（初测 0.227 系判定层单次判定噪声 20.6% 翻转所致，
+  3 轮多数投票修复后提升 3 倍；残余低分确为语料覆盖缺口，详见 RAG_EVALUATION_REPORT_FINAL.md §3.3）；
+- 结构化引用（e2e live，2026-09-03 修复后）：带【参考史料】引用 **18/20（90%）**、
+  越界引用丢弃 0、路由 20/20——生产 LLM 调用已加 `response_format=json_object` 强制 +
+  端点降级 + 解析失败定向重试 + 提示词"检索到史料必须引用"；余量 10% 为模型偶发输出
+  空引用列表，保持诚实引用、不加代码侧自动补引；
 - LLM 依赖外部 API（需联网），本地仅 Embedding 离线。
 
 **可扩展方向**

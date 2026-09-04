@@ -60,14 +60,15 @@ _PARSE_FAILS = 0
 _JSON_CALLS = 0
 
 
-def _chat(client, agent, messages, temperature):
-    """带 max_tokens 的 LLM 调用（复用 settings.llm_max_tokens，与生产口径一致
-    规避 reasoning 模型截断；evaluate_end_to_end 已据此修复生产 _call_api_with_retry）。"""
+def _chat(client, agent, messages, temperature, max_tokens=None):
+    """带 max_tokens 的 LLM 调用（默认复用 settings.llm_max_tokens，与生产口径一致
+    规避 reasoning 模型截断；evaluate_end_to_end 已据此修复生产 _call_api_with_retry）。
+    max_tokens 可覆盖：评测的拆声明/判定需要更长预算（1024 会被 reasoning 吃空，实测）。"""
     raw = client.chat.completions.create(
         model=agent.settings.llm_model,
         messages=messages,
         temperature=temperature,
-        max_tokens=agent.settings.llm_max_tokens,
+        max_tokens=max_tokens or agent.settings.llm_max_tokens,
     )
     return raw.choices[0].message.content or ""
 
@@ -97,27 +98,36 @@ def _generate_reply(client, agent, item: dict) -> tuple:
     return result, [], rag
 
 
-def _llm_json(client, agent, system: str, user: str) -> list:
-    """让 LLM 返回 JSON 数组（temperature=0 稳定输出），解析失败返回 [] 并计数。"""
+def _llm_json(client, agent, system: str, user: str, max_tokens: int = 4096,
+              retries: int = 2) -> list:
+    """让 LLM 返回 JSON 数组（temperature=0 稳定输出）。
+
+    max_tokens 默认 4096：拆声明这类"长 JSON 数组"输出在 1024 预算下会被
+    DeepSeek reasoning_content 吃空（实测 raw 为空 → 解析失败 → 假 0 分）。
+    retries：空响应/解析失败重试，仍失败返回 [] 并计数（区分真 0 分与测量失败）。
+    """
     global _JSON_CALLS, _PARSE_FAILS
-    _JSON_CALLS += 1
-    raw = _chat(client, agent,
-                [{"role": "system", "content": system}, {"role": "user", "content": user}],
-                0.0)
-    raw = raw.strip()
-    if raw.startswith("```"):
-        raw = raw.strip("`").strip()
-        if raw.startswith("json"):
-            raw = raw[4:].strip()
-    try:
-        data = json.loads(raw)
-        if isinstance(data, list):
-            return data
-        _PARSE_FAILS += 1
-        return []
-    except Exception:
-        _PARSE_FAILS += 1
-        return []
+    for attempt in range(retries + 1):
+        _JSON_CALLS += 1
+        raw = _chat(client, agent,
+                    [{"role": "system", "content": system}, {"role": "user", "content": user}],
+                    0.0, max_tokens=max_tokens)
+        raw = raw.strip()
+        # 容错提取 JSON 数组：兼容 ```json 围栏、前缀文本、截断后的尾部
+        import re as _re
+        m = _re.search(r"\[.*\]", raw, _re.S)
+        if m:
+            raw = m.group(0)
+        if not raw:
+            continue  # 空响应 → 重试
+        try:
+            data = json.loads(raw)
+            if isinstance(data, list):
+                return data
+        except Exception:
+            pass
+    _PARSE_FAILS += 1
+    return []
 
 
 def _embed(texts):
@@ -137,25 +147,62 @@ def _cos(a, b):
 
 # ───────────────────────── 三个指标 ─────────────────────────
 
-def _faithfulness(client, agent, query: str, reply: str, context_text: str) -> float:
-    claims = _llm_json(
-        client, agent,
-        "你是评测助手。把用户给出的回答拆成若干条互不重叠的独立事实声明，"
-        "只输出 JSON 字符串数组，不要任何解释。",
-        f"问题：{query}\n\n回答：{reply}",
-    )
-    claims = [c for c in claims if isinstance(c, str) and c.strip()][:20]
+_FAITH_VOTE = 3  # 判定多数投票轮数（消除单次 LLM 判定噪声，见 /tmp/vote_test.py）
+
+# 判定/重相关/引用均为极短 JSON 输出，2048 足够且省 reasoning token；
+# 若某模型 2048 下空响应，调用方可预检后回退 4096（见 gen_sample.py preflight）。
+_JUDGE_MAX_TOKENS = 2048
+
+
+def _faithfulness(client, agent, query: str, reply: str, context_text: str,
+                  vote_rounds: int = _FAITH_VOTE) -> float:
+    """忠实度：声明被史料上下文支持的占比。
+
+    vote_rounds>1 时对每条声明多次判定取多数（判定噪声实测 ~20% 声明在单次
+    判定间翻转，0↔1；多数投票收敛到稳定值）。拆声明失败重试 2 次。
+    """
+    if not context_text or not context_text.strip():
+        return 0.0  # 无史料上下文 → 无条件 0 分（no-RAG 设计口径，也省判定调用）
+    claims = []
+    for _ in range(3):
+        claims = _llm_json(
+            client, agent,
+            "你是评测助手。把用户给出的回答拆成若干条互不重叠的独立事实声明，"
+            "只输出 JSON 字符串数组，不要任何解释。",
+            f"问题：{query}\n\n回答：{reply}",
+        )
+        claims = [c for c in claims if isinstance(c, str) and c.strip()][:20]
+        if claims:
+            break
     if not claims:
         return 0.0
     supported = 0
     for c in claims:
-        v = _llm_json(
-            client, agent,
-            "你是忠实度评测助手。判断声明是否被史料上下文支持（或由上下文"
-            "可直接推出）。只输出 JSON：[{\"supported\": true|false}]",
-            f"史料上下文：\n{context_text[:3000]}\n\n声明：{c}",
-        )
-        if v and isinstance(v[0], dict) and v[0].get("supported") is True:
+        votes = []
+        rounds = 0
+        while rounds < max(1, vote_rounds):
+            rounds += 1
+            v = _llm_json(
+                client, agent,
+                "你是忠实度评测助手。判断声明是否被史料上下文支持（或由上下文"
+                "可直接推出）。特别规则：若声明是「史料未记载/正史未录/无从考"
+                "证/不敢妄言」这类否定性表述，当上下文确实未出现该内容时，应视"
+                "为被支持（回答如实反映史料缺失，是正确行为）；仅当上下文实际"
+                "存在该内容却声称没有时，才判不支持。"
+                "只输出 JSON：[{\"supported\": true|false}]",
+                f"史料上下文：\n{context_text[:3000]}\n\n声明：{c}",
+                max_tokens=_JUDGE_MAX_TOKENS,
+            )
+            if v and isinstance(v[0], dict) and v[0].get("supported") is True:
+                votes.append(True)
+            elif v and isinstance(v[0], dict) and v[0].get("supported") is False:
+                votes.append(False)
+            # 解析失败：不计票（本轮作废）
+            # 惰性投票：两票一致即定论（与三票多数完全等价，省 1/3 判定调用）；
+            # 前两票分歧才补第三票
+            if len(votes) >= 2 and votes[-1] == votes[-2]:
+                break
+        if votes and sum(votes) / len(votes) > 0.5:
             supported += 1
     return supported / len(claims)
 
@@ -166,6 +213,7 @@ def _answer_relevancy(client, agent, query: str, reply: str) -> float:
         "你是评测助手。根据回答内容，反向生成 3 个该回答能回答的问题。"
         "只输出 JSON 字符串数组，不要任何解释。",
         f"回答：{reply}",
+        max_tokens=_JUDGE_MAX_TOKENS,
     )
     regen = [q for q in regen if isinstance(q, str) and q.strip()][:3]
     if not regen:
@@ -191,6 +239,7 @@ def _citation_accuracy(client, agent, reply: str, cited: list, rag) -> float:
             '[{"correct": true|false}]',
             f"史料[{s['title']}（{s['character']}）]\n{rag.documents[i].page_content[:800]}"
             f"\n\n回答：{reply[:1500]}",
+            max_tokens=_JUDGE_MAX_TOKENS,
         )
         if v and isinstance(v[0], dict) and v[0].get("correct") is True:
             correct += 1

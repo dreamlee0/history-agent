@@ -222,7 +222,7 @@ RETRIEVAL_MODE=hybrid python scripts/evaluate_retrieval_full.py  # 混合检索�
 python scripts/benchmark_retrieval.py --limit 20
 python scripts/benchmark_retrieval.py --limit 20 --out bench.json   # 结果落盘
 
-# 端到端评测：Mock LLM 离线跑通完整 chat 链路（路由/引用 grounding/延迟），--llm live 调真实模型（已实跑 198 条，见报告 §14.5）
+# 端到端评测：Mock LLM 离线跑通完整 chat 链路（路由/引用 grounding/延迟），--llm live 调真实模型（已实跑，见 RAG_EVALUATION_REPORT_FINAL.md §3.4）
 python scripts/evaluate_end_to_end.py
 python scripts/evaluate_end_to_end.py --bad-cite   # 验证越界引用被丢弃
 python scripts/evaluate_end_to_end.py --llm live   # 真实模型（需 .env 配置 DeepSeek key）
@@ -234,13 +234,12 @@ python scripts/evaluate_generation.py --split holdout --cache ...             # 
 # 输出 Faithfulness / Answer Relevancy / Citation Accuracy / 引用覆盖率 / JSON 解析失败率
 ```
 
-**当前实测**（2026-09-03，检索层确定性离线、生成层真实 DeepSeek-v4-flash）：
-- 多相关 Recall@7 **0.745**（train 0.732 / holdout 0.803；改进前 @3=0.307）；库外拒绝率 **22/22**、自传注入率 0/22；
-- 单相关 hit@1 0.897 / MRR 0.933 / 决策正确率 0.986（零回归）；单元测试 114/114；
-- 在线生成：Faithfulness **0.227** / Answer Relevancy **0.570** / Citation Accuracy **0.740** / 引用覆盖率 0.773（train≈holdout，泛化无过拟合）；
-- e2e live 结构化引用（`--llm live`）：带【参考史料】引用 **10/10（100%）**、越界引用丢弃 0 ——生产 LLM 调用已加 `response_format=json_object` 强制 + 端点降级 + 解析失败定向重试（2026-09-03 修复，见 CHANGELOG 与报告 §14.5 修复记录）。
+**当前实测**（检索层确定性离线、生成层真实 DeepSeek-v4-flash）：
+- 检索层：多相关 Recall@7 **0.745**；库外拒绝 **22/22**、自传注入 0/22；单相关 hit@1 0.897 / MRR 0.933 / 决策正确率 0.986；单元测试 114/114；
+- 生成层（50 条代表性抽样）：Faithfulness **0.636**（非负类 **0.723**）/ Answer Relevancy 0.604 / Citation Accuracy 0.735 / 引用覆盖率 0.880；
+- e2e live 结构化引用：带【参考史料】引用 **18/20（90%）**、越界引用丢弃 0、路由 20/20。
 
-完整多轮对比数据见 [RAG_EVALUATION_REPORT_FULL.md](RAG_EVALUATION_REPORT_FULL.md)（§7 混合检索对比 / §8 延迟成本 / §9 端到端 / §10 多格式解析 / §12 复现口径 / **§14 五大问题整改**）。
+详细指标、口径与优化过程见 [RAG_EVALUATION_REPORT_FINAL.md](RAG_EVALUATION_REPORT_FINAL.md)。
 
 ### 📄 多格式文档解析
 
